@@ -195,6 +195,7 @@ h1 {
 }
 
 .campo-form input,
+.campo-form select,
 .campo-form textarea {
   padding: 10px;
   border-radius: 8px;

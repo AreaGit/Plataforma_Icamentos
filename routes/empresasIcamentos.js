@@ -190,20 +190,30 @@ app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
 
 app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), async (req, res) => {
   const chamadoId = req.params.id;
-  const { horario_finalizacao, obs_finalizacao } = req.body;
+  const {
+    horario_finalizacao,
+    obs_finalizacao,
+    cliente_presente,
+    tecnico_presente,
+    produto_ok
+  } = req.body;
+
   const arquivos = req.files || [];
 
   try {
     const chamado = await Chamados.findByPk(chamadoId);
     if (!chamado) return res.status(404).send('Chamado não encontrado');
 
-    // Concatena os caminhos dos arquivos (se houver)
     let caminhosArquivos = '';
     if (arquivos.length > 0) {
       caminhosArquivos = arquivos.map(file => path.join('uploads/finalizacoes', file.filename)).join(',');
     }
 
-    // Salva na tabela chamados_finalizados
+    const clientePresente = cliente_presente?.trim().toLowerCase() === 'sim';
+    const tecnicoPresente = tecnico_presente?.trim().toLowerCase() === 'sim';
+    const produtoOk = produto_ok?.trim().toLowerCase();
+
+    // Salva finalização
     await Chamados_Finalizados.create({
       chamado_id: chamadoId,
       horario_finalizacao,
@@ -211,22 +221,29 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
       caminho: caminhosArquivos
     });
 
-    // Atualiza status do chamado
-    chamado.status = 'Finalizado';
-    await chamado.save();
-
-    // = = = Envio de Mensagens = = =
     const empresa = await Empresas.findByPk(chamado.empresa_id);
     const nome = empresa.nome;
     const numeroChamado = chamado.id;
-    const telefone = empresa.telefone
-    let link = "a definir";
-    let mensagem;
+    const telefone = empresa.telefone;
+    const link = 'a definir';
+    let mensagem = '';
 
-    mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que o seu chamado de içamento nº ${numeroChamado} foi finalizado com sucesso. ✅\n\n📌 As evidências do serviço já estão disponíveis para consulta no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+    if (clientePresente && tecnicoPresente && produtoOk === 'sim') {
+      chamado.status = 'Finalizado';
+      mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que o seu chamado de içamento nº ${numeroChamado} foi finalizado com sucesso. ✅\n\n📌 As evidências do serviço já estão disponíveis para consulta no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+    } else {
+      chamado.status = 'No-show';
+      mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que, devido a ocorrências que impediram a realização do içamento o número ${numeroChamado}, o agendamento foi considerado concluído. ⚠️\n\n⚠️ Importante: Conforme nossas políticas, o no-show implica na cobrança da taxa de no-show.\n\n📌 Para mais detalhes, acesse o nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+    }
+
+    await chamado.save();
     await enviarNotificacaoWhatsapp(telefone, mensagem);
 
-    res.status(200).send('Finalização salva com sucesso');
+    res.json({
+      message: 'Finalização salva com sucesso',
+      status: chamado.status
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Erro ao salvar finalização');

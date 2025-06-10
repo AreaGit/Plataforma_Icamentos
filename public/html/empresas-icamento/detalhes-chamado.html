@@ -34,6 +34,32 @@
       <h2>Finalizar Chamado</h2>
       
       <form id="form-finalizar">
+
+        <div class="campo-form">
+          <label for="cliente_presente">Cliente estava no local ?</label>
+          <select name="cliente_presente" id="cliente_presente">
+            <option value="">Selecionar</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
+        <div class="campo-form">
+          <label for="produto_ok">Tudo certo com o produto ?</label>
+          <select name="produto_ok" id="produto_ok">
+            <option value="">Selecionar</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
+        <div class="campo-form">
+          <label for="tecnico_presente">Técnico estava no local ?</label>
+          <select name="tecnico_presente" id="tecnico_presente">
+            <option value="">Selecionar</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
+
         <div class="campo-form">
           <label for="horario_finalizacao">Horário de Finalização:</label>
           <input type="time" id="horario_finalizacao" name="horario_finalizacao" required>

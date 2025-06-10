@@ -9,6 +9,7 @@ const Precos_Icamentos_Televisores = require('../models/Precos_Icamentos_Televis
 const Precos_Icamentos_Geladeiras = require('../models/Precos_Icamentos_Geladeiras.js');
 const { client, sendMessage } = require('./api/whatsapp-web');
 const Empresas_Icamento = require('../models/Empresas_Icamento.js');
+const moment = require('moment');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no chamados.js');
 });
@@ -100,10 +101,14 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       informacoes_uteis
     } = req.body;
 
-    // Validação: data com no mínimo 48 horas a partir de agora
-    const agora = new Date();
-    const dataAgendada = new Date(data_agendada);
-    const diffHoras = (dataAgendada - agora) / (1000 * 60 * 60);
+    // Converter data do formato DD/MM/YYYY para ISO (YYYY-MM-DD)
+    const dataFormatada = moment(data_agendada, 'DD/MM/YYYY', true);
+    if (!dataFormatada.isValid()) {
+      return res.status(400).json({ success: false, message: 'Data agendada inválida.' });
+    }
+
+    const agora = moment();
+    const diffHoras = dataFormatada.diff(agora, 'hours');
     if (diffHoras < 48) {
       return res.status(400).json({
         success: false,
@@ -122,7 +127,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       produto: produto,
       vt: vt,
       art: art,
-      data_agenda: data_agendada,
+      data_agenda: dataFormatada.toDate(), // já convertido para formato válido
       horario_agenda: horario_agenda,
       informacoes_uteis,
       anexos: arquivos,

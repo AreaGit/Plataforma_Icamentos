@@ -72,8 +72,16 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
           const horario = document.getElementById("horario_finalizacao").value;
           const obs = document.getElementById("obs_finalizacao").value;
           const fotos = document.getElementById("fotos_finalizacao").files;
+          const cliente_presente = document.getElementById('cliente_presente').value;
+          const produto_ok = document.getElementById('produto_ok').value;
+          const tecnico_presente = document.getElementById('tecnico_presente').value;
 
           const formData = new FormData();
+          formData.append("horario_finalizacao", horario);
+          formData.append("obs_finalizacao", obs);
+          formData.append("cliente_presente", cliente_presente);
+          formData.append("produto_ok", produto_ok);
+          formData.append("tecnico_presente", tecnico_presente);
           formData.append("horario_finalizacao", horario);
           formData.append("obs_finalizacao", obs);
           for (let i = 0; i < fotos.length; i++) {
@@ -237,10 +245,16 @@ if (chamado.status === "Aguardando") {
       const horario = document.getElementById("horario_finalizacao").value;
       const obs = document.getElementById("obs_finalizacao").value;
       const fotos = document.getElementById("fotos_finalizacao").files;
+      const cliente_presente = document.getElementById('cliente_presente').value;
+      const produto_ok = document.getElementById('produto_ok').value;
+      const tecnico_presente = document.getElementById('tecnico_presente').value;
 
       const formData = new FormData();
       formData.append("horario_finalizacao", horario);
       formData.append("obs_finalizacao", obs);
+      formData.append("cliente_presente", cliente_presente);
+      formData.append("produto_ok", produto_ok);
+      formData.append("tecnico_presente", tecnico_presente);
       for (let i = 0; i < fotos.length; i++) {
         formData.append("fotos", fotos[i]);
       }
@@ -256,10 +270,10 @@ if (chamado.status === "Aguardando") {
         });
 
         if (res.ok) {
-          aplicarEstiloStatus("Finalizado");
           alert("Chamado finalizado com sucesso!");
           document.getElementById('form-finalizacao').style.display = 'none';
           btnSalvar.style.display = 'none';
+          window.location.reload();
         } else {
           alert("Erro ao finalizar chamado.");
         }
