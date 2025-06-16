@@ -10,10 +10,12 @@ const Precos_Icamentos_Geladeiras = require('../models/Precos_Icamentos_Geladeir
 const { client, sendMessage } = require('./api/whatsapp-web');
 const Empresas_Icamento = require('../models/Empresas_Icamento.js');
 const moment = require('moment');
+require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no chamados.js');
 });
-
+console.log(process.env.STRIPE_SECRET_KEY)
 // Cria a pasta de uploads se não existir
 const uploadPath = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath);
@@ -89,17 +91,27 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
   try {
     const {
       empresa_id,
+      nome,
+      cnpj,
+      email,
       ordem,
       descricao,
       endereco,
+      rua,
+      cidade,
+      estado,
+      cep,
       tipo_icamento,
       produto,
       vt,
       art,
       data_agendada,
       horario_agenda,
-      informacoes_uteis
+      informacoes_uteis,
+      amount
     } = req.body;
+
+    console.log(req.body)
 
     // Converter data do formato DD/MM/YYYY para ISO (YYYY-MM-DD)
     const dataFormatada = moment(data_agendada, 'DD/MM/YYYY', true);
@@ -116,6 +128,66 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       });
     }
 
+    function formatarCNPJ(cnpj) {
+      // Remove todos os caracteres não numéricos
+      cnpj = cnpj.replace(/\D/g, '');
+    
+      // Verifica se o CNPJ tem o tamanho correto (14 dígitos)
+      if (cnpj.length !== 14) {
+        return cnpj; // Retorna o CNPJ original se o tamanho for incorreto
+      }
+    
+      // Formata o CNPJ com a máscara
+      return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, '$1.$2.$3/$4-$5');
+    }
+
+    let cnpjFormatado = formatarCNPJ(cnpj)
+
+    const valorEmCentavos = Math.round(parseFloat(amount) * 100);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: valorEmCentavos,
+      currency: 'brl',
+      confirm: true,
+      payment_method_types: ['boleto'],
+      payment_method_data: {
+        type: 'boleto',
+        boleto: {
+          tax_id: cnpjFormatado // CPF de teste (formato aceito pelo Stripe sem pontuação)
+        },
+        billing_details: {
+          name: nome,
+          email: email,
+          address: {
+            line1: rua,
+            city: cidade,
+            state: estado,
+            postal_code: cep,
+            country: 'BR'
+          }
+        }
+      }
+    });
+
+    console.log('✅ Boleto gerado com sucesso!');
+    console.log('🔗 Link do boleto:', paymentIntent.next_action.boleto_display_details.hosted_voucher_url);
+    console.log('📆 Expira em:', paymentIntent.next_action.boleto_display_details.expires_at);
+
+    const empresa = await Empresas.findByPk(empresa_id);
+    const boletoUrl = paymentIntent.next_action.boleto_display_details.hosted_voucher_url;
+    const vencimento = paymentIntent.next_action.boleto_display_details.expires_at;
+    
+    const mensagemBoleto = `Olá ${nome}, seu chamado está sendo processado. 
+    Para confirmar o agendamento, por favor realize o pagamento do boleto abaixo:
+    
+    💳 *Boleto*: ${boletoUrl}
+    📅 *Vencimento*: ${moment.unix(vencimento).format('DD/MM/YYYY')}
+    
+    Assim que o pagamento for confirmado, seguiremos com o atendimento.
+    `;
+    await enviarNotificacaoWhatsapp(empresa?.telefone, mensagemBoleto);
+
+
     const arquivos = req.files?.map(file => `/uploads/${file.filename}`) || [];
 
     const novoChamado = await Chamados.create({
@@ -131,18 +203,20 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       horario_agenda: horario_agenda,
       informacoes_uteis,
       anexos: arquivos,
-      status: "Aguardando"
+      status: "Aguardando",
+      paymentIntentId: paymentIntent.id,
+      boletoUrl: paymentIntent.next_action.boleto_display_details.hosted_voucher_url,
+      vencimentoBoleto: paymentIntent.next_action.boleto_display_details.expires_at,
     });
 
-    const empresa = await Empresas.findByPk(empresa_id);
-    const telefone = empresa?.telefone;
-    const nome = empresa.nome;
+    const empresa_telefone = empresa?.telefone;
+    const empresa_nome = empresa.nome;
     let link = "a definir";
 
-    let mensagem = `Olá! ${nome} Tudo certo?\nSeu chamado de içamento ${novoChamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG
+    let mensagem = `Olá! ${empresa_nome} Tudo certo?\nSeu chamado de içamento ${novoChamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG
     `;
 
-    await enviarNotificacaoWhatsapp(telefone, mensagem);
+    await enviarNotificacaoWhatsapp(empresa_telefone, mensagem);
 
     const empresa_icamento = await Empresas_Icamento.findByPk(1);
     const telefone_empresa_icamento = empresa_icamento.telefone;

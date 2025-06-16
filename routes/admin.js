@@ -72,7 +72,7 @@ app.get('/assistencia/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const empresa = await Empresas_Icamento.findByPk(id);
+    const empresa = await Empresas.findByPk(id);
 
     if (!empresa) {
       return res.status(404).json({ message: 'Empresa não encontrada' });

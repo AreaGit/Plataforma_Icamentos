@@ -71,6 +71,18 @@ const Chamados = db.define('chamados', {
     nova_data_proposta: {
         type: Sequelize.DATE,
         allowNull: true
+    },
+    paymentIntentId: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+    },
+    boletoUrl: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+    },
+    vencimentoBoleto: {
+        type: Sequelize.DATE,
+        allowNull: true
     }
 });
 

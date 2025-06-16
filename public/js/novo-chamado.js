@@ -17,6 +17,10 @@ function getCookie(cname) {
     return "";
 }
 
+let idEmpresa = getCookie("idEmpresa");
+let idUsuario = getCookie("idUsuario");
+let valorChamado
+
 flatpickr("#data_agendada", {
   locale: "pt", // idioma português
   dateFormat: "d/m/Y", // formato brasileiro
@@ -104,6 +108,7 @@ async function calcularValor() {
     document.getElementById('valor-icamento').style.display = 'block';
     document.getElementById('btnCalcular').style.display = 'none';
     document.getElementById('valor-icamento').textContent = `R$ ${data.valor}`;
+    valorChamado = data.valor;
   } catch {
     document.getElementById('valor-icamento').textContent = 'Erro ao conectar com o servidor.';
   }
@@ -122,6 +127,25 @@ camposParaCalculo.forEach(id => {
   }
 });
 
+async function carregarInfoUsers(id) {
+  try {
+    const response = await fetch(`/assistencia/${id}`)
+    const result = await response.json();
+
+    const data = {
+      id: result.id,
+      nome: result.nome,
+      email: result.email,
+      telefone: result.telefone,
+      cnpj: result.cnpj
+    }
+
+    return data;
+  } catch (error) {
+    console.log(error)
+  }
+};
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
       
@@ -134,7 +158,9 @@ form.addEventListener('submit', async (e) => {
     const cidade = document.getElementById('cidade').value;
     const estado = document.getElementById('estado').value;
     const cep = document.getElementById('cep').value;
-      
+    const response = await fetch(`/assistencia/${idEmpresa}`)
+    const dadosUser = await response.json();
+
     if (diffHoras < 48) {
         alert('A data agendada deve ter no mínimo 48 horas a partir de agora.');
         return;
@@ -145,9 +171,17 @@ form.addEventListener('submit', async (e) => {
     const formData = new FormData();
     
     formData.append('empresa_id', getCookie("idEmpresa"));
+    formData.append('nome', dadosUser.nome);
+    formData.append('telefone', dadosUser.telefone);
+    formData.append('email', dadosUser.email);
+    formData.append('cnpj', dadosUser.cnpj);
     formData.append('ordem', document.getElementById('ordem').value);
     formData.append('descricao', document.getElementById('descricao').value);
     formData.append('endereco', endereco);
+    formData.append('rua', rua);
+    formData.append('cidade', cidade);
+    formData.append('estado', estado);
+    formData.append('cep', cep);
     formData.append('tipo_icamento', document.getElementById('tipo_icamento').value);
     formData.append('produto', document.getElementById('produto').value);
     formData.append('vt', document.getElementById('vt').value);
@@ -155,6 +189,9 @@ form.addEventListener('submit', async (e) => {
     formData.append('data_agendada', document.getElementById('data_agendada').value);
     formData.append('horario_agenda', document.getElementById('horario').value);
     formData.append('informacoes_uteis', document.getElementById('informacoes_uteis').value);
+    formData.append('amount', valorChamado);
+
+    console.log(formData)
         
     const arquivos = document.getElementById('anexos').files;
     for (let i = 0; i < arquivos.length; i++) {
