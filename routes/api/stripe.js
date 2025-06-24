@@ -1,5 +1,5 @@
 const Stripe = require('stripe');
-const stripe = Stripe('sk_test_51RYWJjRwp1LaCwq0rzscZupvPLhMqaPu8Pnw14zDlMa0scHMPw0LRLI8Ic3xmoH482GKM4eGLVBzMMxTQbOYBZxr00umB0IGxi');
+const stripe = Stripe('');
 
 async function createPixPayment({ amount, email }) {
   if (typeof amount !== 'number') throw new Error('amount deve ser um número em centavos.');
