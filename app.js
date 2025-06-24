@@ -25,6 +25,10 @@ app.use('/', chamados);
 app.use('/', empresasIcamentos);
 
 // Rotas
+app.get('/', (req, res) => {
+    res.redirect('/samsung/');
+});
+
 app.get('/samsung/', (req, res) => {
     try {
         const html = fs.readFileSync(path.join(__dirname, './public/html/login.html'), 'utf8');

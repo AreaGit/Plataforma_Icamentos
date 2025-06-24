@@ -35,7 +35,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 .container {
@@ -89,6 +88,8 @@ body {
   cursor: pointer;
   transition: background 0.3s ease;
   grid-column: 1 / -1;
+  position: relative;
+  top: 17px;
 }
 
 .cadastro-form button:hover {
