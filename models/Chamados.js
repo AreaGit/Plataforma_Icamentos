@@ -72,7 +72,7 @@ const Chamados = db.define('chamados', {
         type: Sequelize.DATE,
         allowNull: true
     },
-    paymentIntentId: {
+    nfseUrl: {
         type: Sequelize.STRING(255),
         allowNull: true
     },

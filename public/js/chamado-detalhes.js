@@ -37,6 +37,7 @@ let userId = getCookie("idEmpresa");
   document.getElementById('chamado-art').textContent = chamado.art;
   document.getElementById('chamado-data').textContent = `${chamado.data_agenda} - ${chamado.horario_agenda}`;
   document.getElementById('chamado-endereco').textContent = chamado.endereco;
+  document.getElementById('chamado-boleto').innerHTML = `<a href="${chamado.boletoUrl}" target="_blank">Acesse Aqui</a>`;
 
   // Mostrar campos de data apenas se o status for "Aguardando"
 if (chamado.status === "Aguardando") {

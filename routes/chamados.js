@@ -11,11 +11,10 @@ const { client, sendMessage } = require('./api/whatsapp-web');
 const Empresas_Icamento = require('../models/Empresas_Icamento.js');
 const moment = require('moment');
 require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { cobrancaBoletoAsaas, agendarNfsAsaas, emitirNfs, consultarNf } = require('./api/asaas');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no chamados.js');
 });
-console.log(process.env.STRIPE_SECRET_KEY)
 // Cria a pasta de uploads se não existir
 const uploadPath = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath);
@@ -43,6 +42,18 @@ async function enviarNotificacaoWhatsapp(destinatario, corpo) {
       console.error(`Erro ao enviar mensagem para o cliente ${destinatario}:`, error);
       throw error;
   }
+};
+
+function dataMais35DiasFormatada(data_agendada) {
+  const [dia, mes, ano] = data_agendada.split('/');
+  const data = new Date(`${ano}-${mes}-${dia}T00:00:00`);
+
+  if (isNaN(data.getTime())) {
+    throw new Error('Data inválida fornecida para dataMais35DiasFormatada');
+  }
+
+  data.setDate(data.getDate() + 35);
+  return data.toISOString().split('T')[0];
 }
 
 app.post('/calcular-valor', async (req, res) => {
@@ -91,6 +102,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
   try {
     const {
       empresa_id,
+      customer_asaas_id,
       nome,
       cnpj,
       email,
@@ -144,44 +156,54 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     let cnpjFormatado = formatarCNPJ(cnpj)
 
     const valorEmCentavos = Math.round(parseFloat(amount) * 100);
+    const dataBoletoIcamento = dataMais35DiasFormatada(data_agendada);
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: valorEmCentavos,
-      currency: 'brl',
-      confirm: true,
-      payment_method_types: ['boleto'],
-      payment_method_data: {
-        type: 'boleto',
-        boleto: {
-          tax_id: cnpjFormatado // CPF de teste (formato aceito pelo Stripe sem pontuação)
-        },
-        billing_details: {
-          name: nome,
-          email: email,
-          address: {
-            line1: rua,
-            city: cidade,
-            state: estado,
-            postal_code: cep,
-            country: 'BR'
-          }
-        }
-      }
-    });
+    const dadosCliente = {
+      customer: customer_asaas_id,
+      value: amount,
+      dueDate: dataBoletoIcamento,
+      description: 'Boleto para Chamado Içamento SSG'
+    }
 
+    // Gerar Boleto Asaas
+
+    const boleto = await cobrancaBoletoAsaas(dadosCliente);
+    console.log(boleto);
     console.log('✅ Boleto gerado com sucesso!');
-    console.log('🔗 Link do boleto:', paymentIntent.next_action.boleto_display_details.hosted_voucher_url);
-    console.log('📆 Expira em:', paymentIntent.next_action.boleto_display_details.expires_at);
+    console.log('🔗 Link do boleto:', boleto.bankSlipUrl);
+    console.log('📆 Expira em:', boleto.dueDate);
+
+    // Emitir NFS-e Asaas
+    const hojeFormatado = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+    const dadosNfs = {
+      payment: boleto.id,
+      customer: customer_asaas_id,
+      externalReference: Math.floor(Math.random() * 999) + 1,
+      value: amount,
+      effectiveDate: hojeFormatado
+    }
+
+    const nfse = await agendarNfsAsaas(dadosNfs);
+    const invoice = nfse.id;
+
+    const nfseEmitida = await emitirNfs(invoice);
+    const externalReference = nfseEmitida.externalReference;
+
+    const notaAutorizada = await consultarNf(externalReference);
+    console.log('Nota autorizada:', notaAutorizada);
+    const nfseUrl = notaAutorizada.pdfUrl;
+    
 
     const empresa = await Empresas.findByPk(empresa_id);
-    const boletoUrl = paymentIntent.next_action.boleto_display_details.hosted_voucher_url;
-    const vencimento = paymentIntent.next_action.boleto_display_details.expires_at;
+    const boletoUrl = boleto.bankSlipUrl;
+    const vencimento = boleto.dueDate;
     
     const mensagemBoleto = `Olá ${nome}, seu chamado está sendo processado. 
     Para confirmar o agendamento, por favor realize o pagamento do boleto abaixo:
     
     💳 *Boleto*: ${boletoUrl}
-    📅 *Vencimento*: ${moment.unix(vencimento).format('DD/MM/YYYY')}
+    📅 *Vencimento*: ${vencimento}
+    🧾 *Nota Fiscal de Serviço*: ${nfseUrl}
     
     Assim que o pagamento for confirmado, seguiremos com o atendimento.
     `;
@@ -204,9 +226,9 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       informacoes_uteis,
       anexos: arquivos,
       status: "Aguardando",
-      paymentIntentId: paymentIntent.id,
-      boletoUrl: paymentIntent.next_action.boleto_display_details.hosted_voucher_url,
-      vencimentoBoleto: paymentIntent.next_action.boleto_display_details.expires_at,
+      nfseUrl: nfseUrl,
+      boletoUrl: boletoUrl,
+      vencimentoBoleto: vencimento,
     });
 
     const empresa_telefone = empresa?.telefone;

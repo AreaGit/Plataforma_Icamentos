@@ -3,6 +3,7 @@ const app = express();
 const bcrypt = require('bcrypt');
 const Empresas = require('../models/Empresas');
 const Usuarios_Autorizados = require('../models/Usuarios_Autorizados');
+const { criarClienteAsaas } = require('./api/asaas');
 const { client, sendMessage } = require('./api/whatsapp-web');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no cadastros.js');
@@ -57,10 +58,40 @@ app.post('/cadastrar', async (req, res) => {
       complemento, razao, cnpj, telefone, email, senha
     } = req.body;
 
-    const senhaHash = await bcrypt.hash(senha, 10);
+    function formatarCNPJ(cnpj) {
+      cnpj = cnpj.replace(/[^\d]+/g, ''); // remove tudo que não é número
 
+      if (cnpj.length !== 14) return cnpj;
+
+      return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+
+    const cnpjFormatado = formatarCNPJ(cnpj);
+
+    function formatarTelefone(telefone) {
+      return telefone.replace(/\D/g, '');
+    }
+
+    const telefoneFormatado = formatarTelefone(telefone);
+
+    const dadosCliente = {
+      name: nome,
+      document: cnpjFormatado,
+      email: email,
+      phone: telefoneFormatado,
+      address: rua,
+      addressNumber: numeroRes,
+      complement: complemento,
+      province: bairro,
+      postalCode: cep,
+      externalReference: Math.floor(Math.random() * 999) + 1
+    };
+
+    const clienteAsaas = await criarClienteAsaas(dadosCliente);
+    const senhaHash = await bcrypt.hash(senha, 10);
     const novaEmpresa = await Empresas.create({
       nome,
+      customer_asaas_id: clienteAsaas.id,
       cep,
       estado,
       cidade,
@@ -74,7 +105,7 @@ app.post('/cadastrar', async (req, res) => {
       email,
       senha: senhaHash
     });
-
+      
     return res.status(201).json({ success: true, empresa: novaEmpresa });
   } catch (error) {
     console.error(error);

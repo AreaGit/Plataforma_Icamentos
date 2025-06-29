@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Criar Novo Chamado - Içamentos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -118,6 +119,19 @@
       <button type="submit">Criar Chamado</button>
     </form>
   </main>
+  <div class="loading-screen">
+    <div class="spinner"></div>
+  </div>
+  <div id="aviso-erro" class="alerta alerta-aviso" style="display: none;">
+    <span class="icone">&#9888;</span>
+    <span class="mensagem">Erro ao agendar Chamado!</span>
+    <span class="fechar" onclick="fecharAvisoErro()">&#10005;</span>
+  </div>
+    <div id="aviso-sucesso" class="alerta alerta-aviso-sucesso">
+    <span class="icone"><i class="fas fa-check-circle"></i></span>
+    <span class="mensagem">Chamado agendado com Sucesso!</span>
+    <span class="fechar" onclick="fecharAvisoSucesso()">&#10005;</span>
+  </div>
   <script src="../js/novo-chamado.js"></script>
 </body>
 </html>

@@ -199,12 +199,6 @@ document.querySelector('.cadastro-form').addEventListener('submit', async functi
     senha: document.getElementById('senha').value
   };
 
-  const confirmarSenha = document.getElementById('confirmar-senha').value;
-  if (data.senha !== confirmarSenha) {
-    alert('As senhas não coincidem.');
-    return;
-  }
-
   try {
     const response = await fetch('/cadastrar', {
       method: 'POST',

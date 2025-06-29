@@ -7,6 +7,9 @@ const Empresas = db.define('empresas', {
         autoIncrement: true,
         primaryKey: true
     },
+    customer_asaas_id: {
+        type: Sequelize.STRING(100)
+    },
     nome: {
         type: Sequelize.STRING(100),
         allowNull: false

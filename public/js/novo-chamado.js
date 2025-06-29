@@ -1,3 +1,23 @@
+window.addEventListener('load', function() {
+  // Quando a página carrega
+  document.querySelector('.loading-screen').style.display = 'none'; // Oculta a tela de carregamento
+});
+function mostrarAvisoErro() {
+  document.getElementById("aviso-erro").style.display = "block";
+}
+
+function fecharAvisoErro() {
+  document.getElementById("aviso-erro").style.display = "none";
+}
+
+function mostrarAvisoSucesso() {
+  document.getElementById("aviso-sucesso").style.display = "block";
+}
+
+function fecharAvisoSucesso() {
+  document.getElementById("aviso-sucesso").style.display = "none";
+}
+
 const form = document.getElementById('form-chamado');
 let enderecoCompleto
 
@@ -147,6 +167,7 @@ async function carregarInfoUsers(id) {
 };
 
 form.addEventListener('submit', async (e) => {
+    document.querySelector('.loading-screen').style.display = 'block';
     e.preventDefault();
       
     const dataAgendada = new Date(document.getElementById('data_agendada').value);
@@ -171,6 +192,7 @@ form.addEventListener('submit', async (e) => {
     const formData = new FormData();
     
     formData.append('empresa_id', getCookie("idEmpresa"));
+    formData.append('customer_asaas_id', dadosUser.customer_asaas_id);
     formData.append('nome', dadosUser.nome);
     formData.append('telefone', dadosUser.telefone);
     formData.append('email', dadosUser.email);
@@ -206,10 +228,15 @@ form.addEventListener('submit', async (e) => {
     const result = await res.json();
         
     if (result.success) {
-        alert('Chamado criado com sucesso!');
+      document.querySelector('.loading-screen').style.display = 'none';
+      mostrarAvisoSucesso();
+      setTimeout(() => {
         window.location.href = '/samsung/dashboard';
+      }, 3000)
     } else {
-        alert('Erro ao criar chamado: ' + result.message);
+      document.querySelector('.loading-screen').style.display = 'none';
+      mostrarAvisoErro();
+      alert('Erro ao criar chamado: ' + result.message);
     }
 });
 
