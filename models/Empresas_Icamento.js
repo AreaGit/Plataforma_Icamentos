@@ -7,6 +7,9 @@ const Empresas_Icamento = db.define('empresas_icamentos', {
         autoIncrement: true,
         primaryKey: true
     },
+    customer_asaas_id: {
+        type: Sequelize.STRING(100)
+    },
     nome: {
         type: Sequelize.STRING(100),
         allowNull: false
@@ -69,9 +72,9 @@ const Empresas_Icamento = db.define('empresas_icamentos', {
         type: Sequelize.STRING(50),
         allowNull: false
     },
-    recipientId: {
-        type: Sequelize.STRING(255),
-        allowNull: false
+    ispbBanco: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
     },
     senha: {
         type: Sequelize.STRING(255),

@@ -427,7 +427,7 @@ app.post('/cadastrar-empresas-icamento', async (req, res) => {
   try {
     const {
       nome, cep, estado, cidade, bairro, rua, numeroRes, complemento,
-      telefone, cnpj, razao, email, conta_corrente, agencia, banco, senha
+      telefone, cnpj, razao, email, conta_corrente, agencia, banco, ispbBanco, senha
     } = req.body;
 
     const senhaHash = await bcrypt.hash(senha, 10);
@@ -461,92 +461,25 @@ app.post('/cadastrar-empresas-icamento', async (req, res) => {
     }
     const digitoVerificador = calcularDigitoAgencia(agencia);
 
-    const options = {
-      method: 'POST',
-      url: 'https://api.pagar.me/core/v5/recipients',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        Authorization: 'Basic ' + Buffer.from(`sk_KVlgJBsKOTQagkmR:`).toString('base64')
-      },
-      body: {
-        register_information: {
-          main_address: {
-            street: rua,
-            complementary: complemento,
-            street_number: numeroRes,
-            neighborhood: bairro,
-            city: cidade,
-            state: estado,
-            zip_code: cep,
-            reference_point: 'Nenhum'
-          },
-          company_name: nome,
-          trading_name: nome,
-          email,
-          document: cnpjFormatado,
-          type: 'corporation',
-          site_url: 'https://imprimeai.com.br',
-          annual_revenue: 1000000,
-          corporation_type: 'LTDA',
-          founding_date: new Date().toISOString().split('T')[0],
-          phone_numbers: [{ ddd, number: telefoneFormatado, type: 'mobile' }],
-          managing_partners: [{
-            name: nome,
-            email,
-            document: cnpjFormatado,
-            type: 'corporation',
-            monthly_income: 120000,
-            mother_name: 'Nulo',
-            birthdate: new Date().toISOString().split('T')[0],
-            professional_occupation: 'Empresa Içamento',
-            self_declared_legal_representative: true,
-            address: {
-              street: rua,
-              complementary: complemento,
-              street_number: numeroRes,
-              neighborhood: bairro,
-              city: cidade,
-              state: estado,
-              zip_code: cep,
-              reference_point: 'Nenhum'
-            },
-            phone_numbers: [{ ddd, number: telefoneFormatado, type: 'mobile' }]
-          }]
-        },
-        default_bank_account: {
-          holder_name: nome,
-          holder_document: cnpjFormatado,
-          holder_type: 'company',
-          bank: 394,
-          branch_number: agencia,
-          branch_check_digit: digitoVerificador,
-          account_number,
-          account_check_digit,
-          type: 'checking'
-        },
-        transfer_settings: {
-          transfer_enabled: false,
-          transfer_interval: 'Daily',
-          transfer_day: 0
-        },
-        automatic_anticipation_settings: {
-          enabled: true,
-          type: 'full',
-          volume_percentage: 50,
-          delay: null
-        },
-        code: Math.floor(1000 + Math.random() * 9000).toString()
-      },
-      json: true
+    const dadosCliente = {
+      name: nome,
+      document: cnpjFormatado,
+      email: email,
+      phone: telefoneFormatado,
+      address: rua,
+      addressNumber: numeroRes,
+      complement: complemento,
+      province: bairro,
+      postalCode: cep,
+      externalReference: Math.floor(Math.random() * 999) + 1
     };
 
-    const pagarmeResponse = await request(options);
-
-    console.log(pagarmeResponse);
+    const cliente = await criarClienteAsaas(dadosCliente);
+    console.log("Cliente criado: ", cliente);
 
     const novaEmpresa = await Empresas_Icamento.create({
       nome: nome,
+      customer_asaas_id: cliente.id,
       cep: cep,
       estado: estado,
       cidade: cidade,
@@ -561,8 +494,8 @@ app.post('/cadastrar-empresas-icamento', async (req, res) => {
       conta_corrente: conta_corrente,
       agencia: agencia,
       banco: banco,
+      ispbBanco: ispbBanco,
       senha: senhaHash,
-      recipientId: pagarmeResponse.id || pagarmeResponse.recipient?.id,
       status: "Ativa"
     });
 
