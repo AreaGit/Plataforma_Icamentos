@@ -1,3 +1,8 @@
+window.addEventListener('load', function() {
+  // Quando a página carrega
+  document.querySelector('.loading-screen').style.display = 'none'; // Oculta a tela de carregamento
+});
+
 let statusAtualChamado;
 
 const statusSequencia = [
@@ -61,6 +66,7 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
   if (proximoStatus && !statusFinal.includes(statusAtual)) {
     btn.style.display = 'inline-flex';
     btn.onclick = async () => {
+      document.querySelector('.loading-screen').style.display = 'block';
       if (proximoStatus === "Finalizado") {
         formFinalizacao.style.display = "block";
         window.location.reload();
@@ -95,14 +101,17 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
             });
 
             if (res.ok) {
+              document.querySelector('.loading-screen').style.display = 'none';
               aplicarEstiloStatus("Finalizado");
               btn.style.display = "none";
               alert("Chamado finalizado com sucesso!");
               formFinalizacao.style.display = "none";
             } else {
+              document.querySelector('.loading-screen').style.display = 'none';
               alert("Erro ao finalizar chamado.");
             }
           } catch (err) {
+            document.querySelector('.loading-screen').style.display = 'none';
             console.error(err);
             alert("Erro ao enviar dados.");
           }
@@ -122,12 +131,15 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
           });
 
           if (res.ok) {
+            document.querySelector('.loading-screen').style.display = 'none';
             aplicarEstiloStatus(proximoStatus);
             configurarBotaoAvancarStatus(proximoStatus, chamadoId);
           } else {
+            document.querySelector('.loading-screen').style.display = 'none';
             alert("Erro ao atualizar status.");
           }
         } catch (err) {
+          document.querySelector('.loading-screen').style.display = 'none';
           alert("Erro de rede.");
         }
 
@@ -136,6 +148,7 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
       }
     };
   } else {
+    document.querySelector('.loading-screen').style.display = 'none';
     btn.style.display = 'none';
   }
 }
@@ -173,6 +186,7 @@ if (chamado.status === "Aguardando") {
     if (chamado.proponenteId != userId || chamado.tipoProponente != tipo) {
       btnAceitar.style.display = 'inline-block';
       btnAceitar.onclick = async () => {
+        document.querySelector('.loading-screen').style.display = 'block';
         const res = await fetch(`/chamado/${chamado.id}/aceitar-proposta`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -180,9 +194,11 @@ if (chamado.status === "Aguardando") {
         });
 
         if (res.ok) {
+          document.querySelector('.loading-screen').style.display = 'none';
           alert("Nova data aceita!");
           window.location.reload();
         } else {
+          document.querySelector('.loading-screen').style.display = 'none';
           const data = await res.json();
           alert("Erro ao aceitar proposta: " + (data.error || 'Erro desconhecido'));
         }
@@ -202,6 +218,7 @@ if (chamado.status === "Aguardando") {
   };
 
   document.getElementById("btnProporNovaData").onclick = async () => {
+    document.querySelector('.loading-screen').style.display = 'block';
     const data = document.getElementById("data_input").value;
     const hora = document.getElementById("hora_input").value;
     if (!data || !hora) return alert("Escolha uma data e horário válido.");
@@ -215,9 +232,11 @@ if (chamado.status === "Aguardando") {
     });
 
     if (res.ok) {
+      document.querySelector('.loading-screen').style.display = 'none';
       alert("Nova data proposta com sucesso.");
       window.location.reload();
     } else {
+      document.querySelector('.loading-screen').style.display = 'none';
       const data = await res.json();
       alert("Erro: " + data.error);
     }
@@ -242,6 +261,7 @@ if (chamado.status === "Aguardando") {
     document.getElementById('btnAvancarStatus').style.display = 'none';
 
     document.getElementById('btnSalvar').addEventListener('click', async () => {
+      document.querySelector('.loading-screen').style.display = 'block';
       const horario = document.getElementById("horario_finalizacao").value;
       const obs = document.getElementById("obs_finalizacao").value;
       const fotos = document.getElementById("fotos_finalizacao").files;
@@ -270,6 +290,7 @@ if (chamado.status === "Aguardando") {
         });
 
         if (res.ok) {
+          document.querySelector('.loading-screen').style.display = 'none';
           alert("Chamado finalizado com sucesso!");
           document.getElementById('form-finalizacao').style.display = 'none';
           btnSalvar.style.display = 'none';

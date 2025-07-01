@@ -173,27 +173,6 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     console.log('🔗 Link do boleto:', boleto.bankSlipUrl);
     console.log('📆 Expira em:', boleto.dueDate);
 
-    // Emitir NFS-e Asaas
-    const hojeFormatado = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-    const dadosNfs = {
-      payment: boleto.id,
-      customer: customer_asaas_id,
-      externalReference: Math.floor(Math.random() * 999) + 1,
-      value: amount,
-      effectiveDate: hojeFormatado
-    }
-
-    const nfse = await agendarNfsAsaas(dadosNfs);
-    const invoice = nfse.id;
-
-    const nfseEmitida = await emitirNfs(invoice);
-    const externalReference = nfseEmitida.externalReference;
-
-    const notaAutorizada = await consultarNf(externalReference);
-    console.log('Nota autorizada:', notaAutorizada);
-    const nfseUrl = notaAutorizada.pdfUrl;
-    
-
     const empresa = await Empresas.findByPk(empresa_id);
     const boletoUrl = boleto.bankSlipUrl;
     const vencimento = boleto.dueDate;
@@ -203,7 +182,6 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     
     💳 *Boleto*: ${boletoUrl}
     📅 *Vencimento*: ${vencimento}
-    🧾 *Nota Fiscal de Serviço*: ${nfseUrl}
     
     Assim que o pagamento for confirmado, seguiremos com o atendimento.
     `;
@@ -214,6 +192,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
 
     const novoChamado = await Chamados.create({
       empresa_id: empresa_id,
+      customer_id: customer_asaas_id,
       ordem_servico: ordem,
       descricao,
       endereco,
@@ -226,9 +205,11 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       informacoes_uteis,
       anexos: arquivos,
       status: "Aguardando",
-      nfseUrl: nfseUrl,
+      nfseUrl: "a emitir",
       boletoUrl: boletoUrl,
+      boletoId: boleto.id,
       vencimentoBoleto: vencimento,
+      amount: amount
     });
 
     const empresa_telefone = empresa?.telefone;

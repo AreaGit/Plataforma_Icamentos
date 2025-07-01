@@ -92,7 +92,7 @@ async function consultarClienteAsaas() {
         url: 'https://api-sandbox.asaas.com/v3/customers/cus_000006781945',
         headers: {
             accept: 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
         }
     };
     
@@ -127,7 +127,7 @@ async function cobrancaBoletoAsaas(dadosCliente) {
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
         },
         data: {
             billingType: 'BOLETO',
@@ -159,7 +159,7 @@ async function cobrancaPixAsaas() {
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
         },
         data: {
             billingType: 'PIX',
@@ -186,7 +186,7 @@ async function cobrancaCartaoAsaas() {
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
     },
     data: {
         billingType: 'CREDIT_CARD',
@@ -229,7 +229,7 @@ async function agendarNfsAsaas(dadosNfs) {
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
         },
         data: {
             taxes: {retainIss: true, cofins: 1, csll: 1, inss: 1, ir: 1, pis: 1, iss: 5},
@@ -267,7 +267,8 @@ async function emitirNfs(invoice) {
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+
     }
     };
 
@@ -287,7 +288,8 @@ async function listarNfs(externalReference) {
     url: `https://api-sandbox.asaas.com/v3/invoices?externalReference=${externalReference}`,
     headers: {
         accept: 'application/json',
-        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg3YjA5YTE4LTM4ODYtNDQxNS1iYTY0LTM5ZDIyZTYyMWI3Mjo6JGFhY2hfZGFjZTM1YzktNTQ0NC00NjE2LTk5MTYtNGIzZWZmZTI0ZDhi'
+        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+
     }
     };
 

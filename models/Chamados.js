@@ -12,6 +12,9 @@ const Chamados = db.define('chamados', {
         type: Sequelize.INTEGER,
         allowNull: false,
     },
+    customer_id: {
+        type: Sequelize.STRING(100)
+    },
     ordem_servico: {
         type: Sequelize.STRING(100),
         allowNull: false
@@ -80,9 +83,15 @@ const Chamados = db.define('chamados', {
         type: Sequelize.STRING(255),
         allowNull: true
     },
+    boletoId: {
+        type: Sequelize.STRING(100)
+    },
     vencimentoBoleto: {
         type: Sequelize.DATE,
         allowNull: true
+    },
+    amount: {
+        type: Sequelize.INTEGER
     }
 });
 

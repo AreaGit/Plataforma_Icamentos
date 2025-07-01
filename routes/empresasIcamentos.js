@@ -7,6 +7,7 @@ const Chamados = require('../models/Chamados');
 const Chamados_Finalizados = require('../models/Chamados_Finalizados');
 const { Op } = require('sequelize');
 const { client, sendMessage } = require('./api/whatsapp-web');
+const { cobrancaBoletoAsaas, agendarNfsAsaas, emitirNfs, consultarNf } = require('./api/asaas');
 const Empresas = require('../models/Empresas');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no empresasIcamentos.js');
@@ -236,8 +237,35 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
       mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que, devido a ocorrências que impediram a realização do içamento o número ${numeroChamado}, o agendamento foi considerado concluído. ⚠️\n\n⚠️ Importante: Conforme nossas políticas, o no-show implica na cobrança da taxa de no-show.\n\n📌 Para mais detalhes, acesse o nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
     }
 
+    // Emitir NFS-e Asaas
+    const hojeFormatado = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+    const dadosNfs = {
+      payment: chamado.boletoId,
+      customer: chamado.customer_id,
+      externalReference: Math.floor(Math.random() * 999) + 1,
+      value: chamado.amount,
+      effectiveDate: hojeFormatado
+    }
+
+    const nfse = await agendarNfsAsaas(dadosNfs);
+    const invoice = nfse.id;
+
+    const nfseEmitida = await emitirNfs(invoice);
+    const externalReference = nfseEmitida.externalReference;
+
+    const notaAutorizada = await consultarNf(externalReference);
+    console.log('Nota autorizada:', notaAutorizada);
+    const nfseUrl = notaAutorizada.pdfUrl;
+
+    chamado.nfseUrl = nfseUrl;
+
+    let mensagemNfse = `Informamos que a sua nota fiscal foi emitida com sucesso. Para acessar, basta clicar no link abaixo:
+
+${nfseUrl}`
+
     await chamado.save();
     await enviarNotificacaoWhatsapp(telefone, mensagem);
+    await enviarNotificacaoWhatsapp(telefone, mensagemNfse);
 
     res.json({
       message: 'Finalização salva com sucesso',
