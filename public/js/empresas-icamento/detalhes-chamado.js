@@ -7,7 +7,6 @@ let statusAtualChamado;
 
 const statusSequencia = [
   "Aguardando",
-  "Agendamento",
   "Agendado",
   "Em Execução",
   "Finalizado"

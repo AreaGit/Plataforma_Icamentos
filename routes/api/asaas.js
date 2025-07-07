@@ -1,6 +1,6 @@
 const axios = require('axios');
 require('dotenv').config();
-const asaas_key = (process.env.ASAAS_SECRET_API_KEY_TEST);
+const asaas_key = ('$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg1Yjg2YzQ3LThkNjctNDYxZS1iYTcxLWZlYmE4ODY0Mzk2NTo6JGFhY2hfM2FkYTYwOWYtNmNkZS00YzQzLThiZWEtZjk0MDBkYzgwYWY2');
 
 if(asaas_key) {
     console.log("HOMOLOGAÇÃO")
@@ -127,7 +127,7 @@ async function cobrancaBoletoAsaas(dadosCliente) {
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+            access_token: asaas_key
         },
         data: {
             billingType: 'BOLETO',
@@ -229,7 +229,7 @@ async function agendarNfsAsaas(dadosNfs) {
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
-            access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+            access_token: asaas_key
         },
         data: {
             taxes: {retainIss: true, cofins: 1, csll: 1, inss: 1, ir: 1, pis: 1, iss: 5},
@@ -267,7 +267,7 @@ async function emitirNfs(invoice) {
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+        access_token: asaas_key
 
     }
     };
@@ -288,7 +288,7 @@ async function listarNfs(externalReference) {
     url: `https://api-sandbox.asaas.com/v3/invoices?externalReference=${externalReference}`,
     headers: {
         accept: 'application/json',
-        access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
+        access_token: asaas_key
 
     }
     };

@@ -9,6 +9,7 @@ const { Op } = require('sequelize');
 const { client, sendMessage } = require('./api/whatsapp-web');
 const { cobrancaBoletoAsaas, agendarNfsAsaas, emitirNfs, consultarNf } = require('./api/asaas');
 const Empresas = require('../models/Empresas');
+const moment = require('moment');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no empresasIcamentos.js');
 });
@@ -23,6 +24,16 @@ async function enviarNotificacaoWhatsapp(destinatario, corpo) {
       console.error(`Erro ao enviar mensagem para o cliente ${destinatario}:`, error);
       throw error;
   }
+}
+
+function dataMais35DiasFormatada(data_agendada) {
+  const data = new Date(data_agendada);
+  if (isNaN(data.getTime())) {
+    throw new Error('Data inválida fornecida para dataMais35DiasFormatada');
+  }
+
+  data.setDate(data.getDate() + 35);
+  return data.toISOString().split('T')[0]; // formato YYYY-MM-DD
 }
 
 // Configuração do destino e nome dos arquivos
@@ -108,7 +119,7 @@ app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
 
     console.log(req.params, req.body)
 
-    const permitido = ["Aguardando", "Agendamento", "Agendado", "Em Execução", "Finalizado", "No-show", "Cancelado"];
+    const permitido = ["Aguardando", "Agendado", "Em Execução", "Finalizado", "No-show", "Cancelado"];
     if (!permitido.includes(status)) {
       return res.status(400).json({ message: "Status inválido" });
     }
@@ -131,23 +142,23 @@ app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
     const numeroChamado = chamado.id;
     const dataHora = chamado.data_agenda;
     const telefone = empresa.telefone
-    let link = "a definir";
+    let link = `areapromocional.com.br/samsung/chamados-detalhes?=id${chamado.id}`;
     let mensagem;
 
     if(status === "Agendamento") {
       chamado.status = "Agendamento";
       await chamado.save();
-      mensagem = `Olá! ${nome} Tudo certo?\nSeu chamado de içamento ${numeroChamado} está sendo agendado no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Acompanhe os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+      mensagem = `Olá! ${nome}\nTudo certo?\nSeu chamado de içamento ${numeroChamado} foi agendado no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Acompanhe os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
       await enviarNotificacaoWhatsapp(telefone, mensagem);
     } else if(status === "Agendado") {
       chamado.status = "Agendado";
       await chamado.save();
-      mensagem = `Olá, ${nome}! Tudo certo?\nSeu chamado de içamento nº ${numeroChamado} foi aberto e já está agendado com sucesso para: ${dataHora}, no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 O agendamento foi aprovado pela empresa de içamento, e você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você continuará recebendo as atualizações por aqui, no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+      mensagem = `Olá, ${nome}!\nTudo certo?\nSeu chamado de içamento nº ${numeroChamado} foi aberto e já está agendado com sucesso para: ${dataHora}, no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 O agendamento foi aprovado pela empresa de içamento, e você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você continuará recebendo as atualizações por aqui, no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
       await enviarNotificacaoWhatsapp(telefone, mensagem);
     } else if(status === "Em Execução") {
       chamado.status = "Em Execução";
       await chamado.save();
-      mensagem = `Olá, ${nome}! Tudo certo?
+      mensagem = `Olá, ${nome}!\nTudo certo?
       Seu chamado de içamento nº ${numeroChamado} está em execução neste momento, conforme o agendamento realizado anteriormente. 🏗️⚙️
       
       📌 Você pode acompanhar o andamento diretamente no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}
@@ -160,12 +171,12 @@ app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
     } else if(status === "Finalizado") {
       chamado.status = "Finalizado";
       await chamado.save();
-      mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que o seu chamado de içamento nº ${numeroChamado} foi finalizado com sucesso. ✅\n\n📌 As evidências do serviço já estão disponíveis para consulta no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+      mensagem = `Olá, ${nome}!\nTudo certo?\nInformamos que o seu chamado de içamento nº ${numeroChamado} foi finalizado com sucesso. ✅\n\n📌 As evidências do serviço já estão disponíveis para consulta no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
       await enviarNotificacaoWhatsapp(telefone, mensagem);
     } else if(status === "No-show") {
       chamado.status = "No-show";
       await chamado.save();
-      message = `Olá, ${nome}! Tudo certo?\nInformamos que, devido a ocorrências que impediram a realização do içamento, o agendamento foi considerado concluído. ⚠️\n\n⚠️ Importante: Conforme nossas políticas, o no-show implica na cobrança da taxa de no-show.\n\n📌 Para mais detalhes, acesse o nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+      message = `Olá, ${nome}!\nTudo certo?\nInformamos que, devido a ocorrências que impediram a realização do içamento, o agendamento foi considerado concluído. ⚠️\n\n⚠️ Importante: Conforme nossas políticas, o no-show implica na cobrança da taxa de no-show.\n\n📌 Para mais detalhes, acesse o nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
       await enviarNotificacaoWhatsapp(telefone, mensagem);
     } else if(status === "Cancelado") {
       chamado.status = "Cancelado";
@@ -237,14 +248,38 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
       mensagem = `Olá, ${nome}! Tudo certo?\nInformamos que, devido a ocorrências que impediram a realização do içamento o número ${numeroChamado}, o agendamento foi considerado concluído. ⚠️\n\n⚠️ Importante: Conforme nossas políticas, o no-show implica na cobrança da taxa de no-show.\n\n📌 Para mais detalhes, acesse o nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}\n\nQualquer dúvida, estamos à disposição por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
     }
 
+    const hoje = new Date();
+    console.log("Data hoje original:", hoje.toISOString());
+    
+    const dataBoletoIcamento = dataMais35DiasFormatada(hoje);
+    console.log("Data + 35 dias (formatada):", dataBoletoIcamento);
+
+    const dadosCliente = {
+      customer: chamado.customer_id,
+      value: chamado.amount,
+      dueDate: dataBoletoIcamento,
+      description: 'Boleto para Chamado Içamento SSG'
+    }
+
+    // Gerar Boleto Asaas
+
+    const boleto = await cobrancaBoletoAsaas(dadosCliente);
+    console.log(boleto);
+    console.log('✅ Boleto gerado com sucesso!');
+    console.log('🔗 Link do boleto:', boleto.bankSlipUrl);
+    console.log('📆 Expira em:', boleto.dueDate);
+
+    const boletoUrl = boleto.bankSlipUrl;
+    const vencimento = boleto.dueDate;
+
     // Emitir NFS-e Asaas
-    const hojeFormatado = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+    const hojeComHifen = new Date().toISOString().split('T')[0];
     const dadosNfs = {
-      payment: chamado.boletoId,
+      payment: boleto.id,
       customer: chamado.customer_id,
       externalReference: Math.floor(Math.random() * 999) + 1,
       value: chamado.amount,
-      effectiveDate: hojeFormatado
+      effectiveDate: hojeComHifen
     }
 
     const nfse = await agendarNfsAsaas(dadosNfs);
@@ -258,13 +293,30 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
     const nfseUrl = notaAutorizada.pdfUrl;
 
     chamado.nfseUrl = nfseUrl;
+    chamado.boletoUrl = boletoUrl;
+    chamado.boletoId = boleto.id;
+    chamado.vencimentoBoleto = vencimento;
 
-    let mensagemNfse = `Informamos que a sua nota fiscal foi emitida com sucesso. Para acessar, basta clicar no link abaixo:
+    let link_pedido = `areapromocional.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
 
-${nfseUrl}`
+    let mensagemNfse = `Olá ${nome}, informamos que o seu chamado de IÇAMENTO foi finalizado com sucesso ✅
+
+📎 Para acompanhar as evidências, clique no link abaixo:
+
+🔗 *Link do pedido:* ${link_pedido}
+
+📄 Seguem abaixo a NFS-e e o boleto referente a este serviço:
+
+💰 *Boleto:* ${boletoUrl}  
+📅 *Vencimento:* ${dataBoletoIcamento}  
+🧾 *NFS-e:* ${nfseUrl}
+
+Qualquer dúvida, estamos à disposição!
+
+Atenciosamente,  
+*Portal de Içamentos SAMSUNG*`;
 
     await chamado.save();
-    await enviarNotificacaoWhatsapp(telefone, mensagem);
     await enviarNotificacaoWhatsapp(telefone, mensagemNfse);
 
     res.json({
@@ -305,7 +357,7 @@ app.put('/empresa-icamentos/chamado/:id/remarcar', async (req, res) => {
     const numeroChamado = chamado.id;
 
     const mensagem = `Olá, ${nome}!
-Estamos propondo uma nova data para o içamento do chamado nº ${numeroChamado}. 📅
+Estamos propondo uma nova data para o Içamento do chamado nº ${numeroChamado}. 📅
 
 🆕 Nova data sugerida: *${new Date(novaData).toLocaleString('pt-BR')}*
 

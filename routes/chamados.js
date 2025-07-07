@@ -140,52 +140,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       });
     }
 
-    function formatarCNPJ(cnpj) {
-      // Remove todos os caracteres não numéricos
-      cnpj = cnpj.replace(/\D/g, '');
-    
-      // Verifica se o CNPJ tem o tamanho correto (14 dígitos)
-      if (cnpj.length !== 14) {
-        return cnpj; // Retorna o CNPJ original se o tamanho for incorreto
-      }
-    
-      // Formata o CNPJ com a máscara
-      return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, '$1.$2.$3/$4-$5');
-    }
-
-    let cnpjFormatado = formatarCNPJ(cnpj)
-
-    const valorEmCentavos = Math.round(parseFloat(amount) * 100);
-    const dataBoletoIcamento = dataMais35DiasFormatada(data_agendada);
-
-    const dadosCliente = {
-      customer: customer_asaas_id,
-      value: amount,
-      dueDate: dataBoletoIcamento,
-      description: 'Boleto para Chamado Içamento SSG'
-    }
-
-    // Gerar Boleto Asaas
-
-    const boleto = await cobrancaBoletoAsaas(dadosCliente);
-    console.log(boleto);
-    console.log('✅ Boleto gerado com sucesso!');
-    console.log('🔗 Link do boleto:', boleto.bankSlipUrl);
-    console.log('📆 Expira em:', boleto.dueDate);
-
     const empresa = await Empresas.findByPk(empresa_id);
-    const boletoUrl = boleto.bankSlipUrl;
-    const vencimento = boleto.dueDate;
-    
-    const mensagemBoleto = `Olá ${nome}, seu chamado está sendo processado. 
-    Para confirmar o agendamento, por favor realize o pagamento do boleto abaixo:
-    
-    💳 *Boleto*: ${boletoUrl}
-    📅 *Vencimento*: ${vencimento}
-    
-    Assim que o pagamento for confirmado, seguiremos com o atendimento.
-    `;
-    await enviarNotificacaoWhatsapp(empresa?.telefone, mensagemBoleto);
 
 
     const arquivos = req.files?.map(file => `/uploads/${file.filename}`) || [];
@@ -206,17 +161,17 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       anexos: arquivos,
       status: "Aguardando",
       nfseUrl: "a emitir",
-      boletoUrl: boletoUrl,
-      boletoId: boleto.id,
-      vencimentoBoleto: vencimento,
+      boletoUrl: "a emitir",
+      boletoId: "a emitir",
+      vencimentoBoleto: "a emitir",
       amount: amount
     });
 
     const empresa_telefone = empresa?.telefone;
     const empresa_nome = empresa.nome;
-    let link = "a definir";
+    let link = `areapromocional.com.br/samsung/chamado-detalhes?id=${novoChamado.id}`;
 
-    let mensagem = `Olá! ${empresa_nome} Tudo certo?\nSeu chamado de içamento ${novoChamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG
+    let mensagem = `Olá! ${empresa_nome}\nTudo certo?\nSeu chamado de Içamento ${novoChamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG
     `;
 
     await enviarNotificacaoWhatsapp(empresa_telefone, mensagem);
