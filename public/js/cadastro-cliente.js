@@ -97,23 +97,29 @@ numeroRes.addEventListener('keyup', () => {
 
 telefone.addEventListener('input', () => {
     let telefoneValue = telefone.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+
     if (telefoneValue.length > 11) {
         telefoneValue = telefoneValue.slice(0, 11); // Limite o comprimento a 11 caracteres
     }
 
-    // Formata o telefone com parênteses e traço (por exemplo, (99) 99999-9999)
-    telefoneValue = telefoneValue.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    // Verifica se o número tem 8 ou 9 dígitos após o DDD e formata adequadamente
+    if (telefoneValue.length <= 10) {
+        telefoneValue = telefoneValue.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3'); // Formato (99) 9999-9999
+    } else {
+        telefoneValue = telefoneValue.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3'); // Formato (99) 99999-9999
+    }
 
     telefone.value = telefoneValue; // Define o valor formatado de volta no campo
 });
 
 telefone.addEventListener('keyup', () => {
     const telefoneValue = telefone.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-    if(telefone.value.length <= 11) {
-        telefone.setAttribute('style', 'color: red; border-color: red;')
+    // Verifica se o comprimento está correto para um número de telefone (10 ou 11 dígitos após a remoção dos parênteses)
+    if (telefoneValue.length < 10 || telefoneValue.length > 11) {
+        telefone.setAttribute('style', 'color: red; border-color: red;');
         validTelefone = false;
     } else {
-        telefone.setAttribute('style', 'color: black; border-color: green;')
+        telefone.setAttribute('style', 'color: black; border-color: green;');
         validTelefone = true;
     }
 });
@@ -209,6 +215,7 @@ document.querySelector('.cadastro-form').addEventListener('submit', async functi
     const result = await response.json();
     if (result.success) {
       alert('Cadastro realizado com sucesso!');
+      window.location.reload();
       // Redirecionar ou limpar formulário
     } else {
       alert('Erro no cadastro: ' + (result.error || ''));

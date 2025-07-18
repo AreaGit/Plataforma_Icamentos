@@ -78,7 +78,7 @@ app.post('/cadastrar', async (req, res) => {
       name: nome,
       document: cnpjFormatado,
       email: email,
-      phone: telefoneFormatado,
+      phone: telefone,
       address: rua,
       addressNumber: numeroRes,
       complement: complemento,

@@ -1,9 +1,9 @@
 const axios = require('axios');
 require('dotenv').config();
-const asaas_key = ('$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6Ojg1Yjg2YzQ3LThkNjctNDYxZS1iYTcxLWZlYmE4ODY0Mzk2NTo6JGFhY2hfM2FkYTYwOWYtNmNkZS00YzQzLThiZWEtZjk0MDBkYzgwYWY2');
+const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmU4ZTNiYjVlLWQ3MzMtNGZmMS04ZTdhLTRiZTdmYzU4MmJlYzo6JGFhY2hfZWE3YWQzNDItNzNiNi00YjA3LTgwMTEtNjZmYzdlNjkwNGI3');
 
 if(asaas_key) {
-    console.log("HOMOLOGAÇÃO")
+    console.log("PRODUÇÃO")
 }
 
 /*
@@ -50,7 +50,7 @@ EXEMPLO DE RESPONSE DE CLIENTE CRIADO EM AMBIENTE SANDBOX DO ASAAS
 async function criarClienteAsaas(dadosCliente) {
     const options = {
     method: 'POST',
-    url: 'https://api-sandbox.asaas.com/v3/customers',
+    url: 'https://api.asaas.com/v3/customers',
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
@@ -89,7 +89,7 @@ async function criarClienteAsaas(dadosCliente) {
 async function consultarClienteAsaas() {
     const options = {
         method: 'GET',
-        url: 'https://api-sandbox.asaas.com/v3/customers/cus_000006781945',
+        url: 'https://api.asaas.com/v3/customers/cus_000006781945',
         headers: {
             accept: 'application/json',
             access_token: '$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmFiMGMyMDY2LTI4NjYtNGVkNy1iZWU2LTQ4YTYzODJhNWNjZDo6JGFhY2hfYzg1NjMyNTQtMTU1OS00MTFhLWI0MzEtYTg3ODBmZTYwMDNm'
@@ -123,7 +123,7 @@ async function removerClienteAsaas() {
 async function cobrancaBoletoAsaas(dadosCliente) {
     const options = {
         method: 'POST',
-        url: 'https://api-sandbox.asaas.com/v3/payments',
+        url: 'https://api.asaas.com/v3/payments',
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
@@ -155,7 +155,7 @@ async function cobrancaBoletoAsaas(dadosCliente) {
 async function cobrancaPixAsaas() {
     const options = {
         method: 'POST',
-        url: 'https://api-sandbox.asaas.com/v3/payments',
+        url: 'https://api.asaas.com/v3/payments',
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
@@ -182,7 +182,7 @@ async function cobrancaPixAsaas() {
 async function cobrancaCartaoAsaas() {
     const options = {
     method: 'POST',
-    url: 'https://api-sandbox.asaas.com/v3/payments/',
+    url: 'https://api.asaas.com/v3/payments/',
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
@@ -225,7 +225,7 @@ async function cobrancaCartaoAsaas() {
 async function agendarNfsAsaas(dadosNfs) {
     const options = {
         method: 'POST',
-        url: 'https://api-sandbox.asaas.com/v3/invoices',
+        url: 'https://api.asaas.com/v3/invoices',
         headers: {
             accept: 'application/json',
             'content-type': 'application/json',
@@ -263,7 +263,7 @@ async function agendarNfsAsaas(dadosNfs) {
 async function emitirNfs(invoice) {
     const options = {
     method: 'POST',
-    url: `https://api-sandbox.asaas.com/v3/invoices/${invoice}/authorize`,
+    url: `https://api.asaas.com/v3/invoices/${invoice}/authorize`,
     headers: {
         accept: 'application/json',
         'content-type': 'application/json',
@@ -285,7 +285,7 @@ async function emitirNfs(invoice) {
 async function listarNfs(externalReference) {
     const options = {
     method: 'GET',
-    url: `https://api-sandbox.asaas.com/v3/invoices?externalReference=${externalReference}`,
+    url: `https://api.asaas.com/v3/invoices?externalReference=${externalReference}`,
     headers: {
         accept: 'application/json',
         access_token: asaas_key
