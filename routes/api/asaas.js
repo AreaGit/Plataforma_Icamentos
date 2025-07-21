@@ -1,6 +1,6 @@
 const axios = require('axios');
 require('dotenv').config();
-const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OmU4ZTNiYjVlLWQ3MzMtNGZmMS04ZTdhLTRiZTdmYzU4MmJlYzo6JGFhY2hfZWE3YWQzNDItNzNiNi00YjA3LTgwMTEtNjZmYzdlNjkwNGI3');
+const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjkzNGFkMGQ3LTA3MDYtNDU2Mi1iMzM5LTU0ZmE3NjNiNzI0YTo6JGFhY2hfOWZmMTlhMGMtZTMwYi00ZjYwLWI1OWMtMjljNGM3NTUxNWEy');
 
 if(asaas_key) {
     console.log("PRODUÇÃO")

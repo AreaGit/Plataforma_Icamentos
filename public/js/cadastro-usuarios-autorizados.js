@@ -21,6 +21,7 @@ document.querySelector('.cadastro-form').addEventListener('submit', async functi
 
   const data = {
     empresa_id: idEmpresa,
+    empresa: document.getElementById('empresa').value,
     nome: document.getElementById('nome').value,
     telefone: document.getElementById('telefone').value,
     email: document.getElementById('email').value,

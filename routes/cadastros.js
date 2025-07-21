@@ -117,13 +117,21 @@ app.post('/cadastrar', async (req, res) => {
 app.post('/cadastrar-usuarios', async (req, res) => {
   try {
     const {
-      empresa_id, nome, telefone, email, senha
+      empresa_id, empresa, nome, telefone, email, senha
     } = req.body;
 
+    console.log("EMPRESA: ", empresa)
+
     const senhaHash = await bcrypt.hash(senha, 10);
+    
+    const empresaEncontrada = await Empresas.findOne({
+      where: { nome: empresa },
+    });
+
+    console.log(empresaEncontrada)
 
     const novoUsuario = await Usuarios_Autorizados.create({
-      empresa_id,
+      empresa_id: empresaEncontrada.id,
       nome,
       email,
       telefone,
