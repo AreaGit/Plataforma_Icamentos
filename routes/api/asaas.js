@@ -1,6 +1,6 @@
 const axios = require('axios');
 require('dotenv').config();
-const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjkzNGFkMGQ3LTA3MDYtNDU2Mi1iMzM5LTU0ZmE3NjNiNzI0YTo6JGFhY2hfOWZmMTlhMGMtZTMwYi00ZjYwLWI1OWMtMjljNGM3NTUxNWEy');
+const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjBlOWNhZWExLWUwNDItNGJkMC1hNGQxLTE0NTIwZDdlNzA2Yzo6JGFhY2hfZmI5YjJjMzEtY2VjZi00Y2VkLWI0ZjUtNWZhMmNhZGY4NjA5');
 
 if(asaas_key) {
     console.log("PRODUÇÃO")
@@ -232,7 +232,7 @@ async function agendarNfsAsaas(dadosNfs) {
             access_token: asaas_key
         },
         data: {
-            taxes: {retainIss: true, cofins: 1, csll: 1, inss: 1, ir: 1, pis: 1, iss: 5},
+            taxes: {retainIss: false, cofins: 1, csll: 1, inss: 1, ir: 1, pis: 1, iss: 5},
             payment: dadosNfs.payment,
             installment: null,
             customer: dadosNfs.customer,
@@ -243,8 +243,8 @@ async function agendarNfsAsaas(dadosNfs) {
             deductions: 0,
             effectiveDate: dadosNfs.effectiveDate,
             municipalServiceId: null,
-            municipalServiceCode: '13.05',
-            municipalServiceName: 'SEVICOS DE ACABAMENTOS GRAFICOS',
+            municipalServiceCode: '16.01',
+            municipalServiceName: 'AGENCIAMENTO DE TRANSPORTE',
             updatePayment: null
         }
     };
