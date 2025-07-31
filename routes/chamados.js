@@ -176,20 +176,24 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
 
     await enviarNotificacaoWhatsapp(empresa_telefone, mensagem);
 
-    const empresa_icamento = await Empresas_Icamento.findByPk(1);
-    const telefone_empresa_icamento = empresa_icamento.telefone;
+    if(empresa_id == 84) {
+      console.log('Chamado feito por Thiago Barbosa');
+    } else {
+      const empresa_icamento = await Empresas_Icamento.findByPk(1);
+      const telefone_empresa_icamento = empresa_icamento.telefone;
+      
+      let mensagem_empresa_icamento = `Olá, tudo bem?
+      Há um novo agendamento de içamento disponível para você no Portal de Içamentos - Samsung. 📦🔧
 
-    let mensagem_empresa_icamento = `Olá, tudo bem?
-    Há um novo agendamento de içamento disponível para você no Portal de Içamentos - Samsung. 📦🔧
+      📌 Por favor, acesse o portal para verificar os detalhes e confirmar o atendimento:
+      ${link}
+      
+      Em caso de dúvidas, estamos à disposição por aqui.
+      Obrigado!
+      Portal de Içamento SAMSUNG`;
+      await enviarNotificacaoWhatsapp(telefone_empresa_icamento, mensagem_empresa_icamento);
 
-    📌 Por favor, acesse o portal para verificar os detalhes e confirmar o atendimento:
-    ${link}
-
-    Em caso de dúvidas, estamos à disposição por aqui.
-    Obrigado!
-    Portal de Içamento SAMSUNG`;
-
-    await enviarNotificacaoWhatsapp(telefone_empresa_icamento, mensagem_empresa_icamento);
+    }
 
     res.status(201).json({ success: true, chamado: novoChamado });
   } catch (err) {
