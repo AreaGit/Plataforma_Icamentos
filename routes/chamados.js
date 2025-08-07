@@ -7,6 +7,8 @@ const Chamados = require('../models/Chamados');
 const Empresas = require('../models/Empresas');
 const Precos_Icamentos_Televisores = require('../models/Precos_Icamentos_Televisores.js');
 const Precos_Icamentos_Geladeiras = require('../models/Precos_Icamentos_Geladeiras.js');
+const Precos_Icamentos_Televisores_Empresas = require('../models/Precos_Icamentos_Televisores_Empresas.js');
+const Precos_Icamentos_Geladeiras_Empresas = require('../models/Precos_Icamentos_Geladeiras_Empresas.js');
 const { client, sendMessage } = require('./api/whatsapp-web');
 const Empresas_Icamento = require('../models/Empresas_Icamento.js');
 const moment = require('moment');
@@ -64,34 +66,50 @@ app.post('/calcular-valor', async (req, res) => {
   }
 
   let model;
+  let model2;
   if (produto === 'GELADEIRA') {
     model = Precos_Icamentos_Geladeiras;
+    model2 = Precos_Icamentos_Geladeiras_Empresas;
   } else if (produto === 'TELEVISOR') {
     model = Precos_Icamentos_Televisores;
+    model2 = Precos_Icamentos_Televisores_Empresas;
   } else {
     return res.status(400).json({ erro: 'Produto inválido' });
   }
 
   try {
     const preco = await model.findOne({ where: { uf, local, regiao } });
+    const preco2 = await model2.findOne({ where: { uf, local, regiao } });
     if (!preco) return res.status(404).json({ erro: 'Preço não encontrado para os parâmetros fornecidos' });
 
     let valor = 0;
+    let valor2 = 0;
     const tipo = tipo_icamento.replace('/', '_');
 
     if (tipo === 'SUBIDA') {
       valor += parseFloat(preco.icamento_para_instalacao || 0);
+      valor2 += parseFloat(preco2.icamento_para_instalacao || 0);
     } else if (tipo === 'DESCIDA') {
       valor += parseFloat(preco.icamento_para_descida || 0);
+      valor2 += parseFloat(preco2.icamento_para_descida || 0);
     } else if (tipo === 'SUBIDA_DESCIDA') {
       valor += parseFloat(preco.icamento_para_instalacao || 0);
       valor += parseFloat(preco.icamento_para_descida || 0);
+
+      valor2 += parseFloat(preco2.icamento_para_instalacao || 0);
+      valor2 += parseFloat(preco2.icamento_para_descida || 0);
     }
 
-    if (art === 'SIM') valor += parseFloat(preco.art || 0);
-    if (vt === 'SIM') valor += parseFloat(preco.vt || 0);
+    if (art === 'SIM') {
+      valor += parseFloat(preco.art || 0);
+      valor2 += parseFloat(preco.art || 0);
+    };
+    if (vt === 'SIM') {
+      valor += parseFloat(preco.vt || 0);
+      valor2 += parseFloat(preco.vt || 0);
+    }
 
-    return res.json({ valor: valor.toFixed(2) });
+    return res.json({ valor: valor.toFixed(2), valor2: valor2.toFixed(2) });
   } catch (e) {
     console.error('Erro ao calcular valor:', e);
     return res.status(500).json({ erro: 'Erro no servidor', detalhe: e.message });
@@ -120,7 +138,8 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       data_agendada,
       horario_agenda,
       informacoes_uteis,
-      amount
+      amount,
+      amount_company
     } = req.body;
 
     console.log(req.body)
@@ -164,7 +183,8 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       boletoUrl: "a emitir",
       boletoId: "a emitir",
       vencimentoBoleto: "a emitir",
-      amount: amount
+      amount: amount,
+      amount_company: amount_company
     });
 
     const empresa_telefone = empresa?.telefone;

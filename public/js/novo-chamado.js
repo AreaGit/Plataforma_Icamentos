@@ -1,3 +1,5 @@
+let valor_empresa_icamento;
+
 window.addEventListener('load', function() {
   // Quando a página carrega
   document.querySelector('.loading-screen').style.display = 'none'; // Oculta a tela de carregamento
@@ -125,6 +127,8 @@ async function calcularValor() {
       return;
     }
 
+    valor_empresa_icamento = data.valor2;
+
     document.getElementById('valor-icamento').style.display = 'block';
     document.getElementById('btnCalcular').style.display = 'none';
     document.getElementById('valor-icamento').textContent = `R$ ${data.valor}`;
@@ -212,6 +216,7 @@ form.addEventListener('submit', async (e) => {
     formData.append('horario_agenda', document.getElementById('horario').value);
     formData.append('informacoes_uteis', document.getElementById('informacoes_uteis').value);
     formData.append('amount', valorChamado);
+    formData.append('amount_company', valor_empresa_icamento);
 
     console.log(formData)
         

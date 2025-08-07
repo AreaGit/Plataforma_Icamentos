@@ -166,7 +166,8 @@ async function carregarDetalhes() {
   document.getElementById('tipo_icamento').textContent = chamado.tipo_icamento;
   document.getElementById('data_agenda').textContent = `${chamado.data_agenda} - ${chamado.horario_agenda}`;
   document.getElementById('status').textContent = chamado.status;
-  document.getElementById('observacoes').textContent = chamado.observacoes;
+  document.getElementById('observacoes').textContent = chamado.observacoes || "Nenhuma";
+  document.getElementById('valor').textContent = "R$ " + chamado.amount_company.toFixed(2);
 
   // Mostrar campos de data apenas se o status for "Aguardando"
 if (chamado.status === "Aguardando") {

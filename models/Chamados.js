@@ -92,6 +92,9 @@ const Chamados = db.define('chamados', {
     },
     amount: {
         type: Sequelize.INTEGER
+    },
+    amount_company: {
+        type: Sequelize.INTEGER
     }
 });
 

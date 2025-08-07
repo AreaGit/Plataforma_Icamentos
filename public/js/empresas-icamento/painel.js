@@ -2,19 +2,22 @@ async function carregarChamados(filtros = {}) {
   const params = new URLSearchParams(filtros).toString();
   const res = await fetch(`/empresa-icamentos/chamados?${params}`);
   const chamados = await res.json();
-  
+
+  // ✅ Ordena por data_agenda em ordem decrescente
+  chamados.sort((a, b) => new Date(b.data_agenda) - new Date(a.data_agenda));
+
   const tbody = document.getElementById('listaChamados');
   tbody.innerHTML = '';
-  
+
   chamados.forEach(chamado => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-    <td>${chamado.id}</td>
-    <td>${chamado.ordem_servico}</td>
-    <td>${chamado.endereco}</td>
-    <td>${chamado.data_agenda}</td>
-    <td>${chamado.status}</td>
-    <td><button onclick="window.location.href='/samsung/empresas-icamento/chamado?id=${chamado.id}'">Ver</button></td>
+      <td>${chamado.id}</td>
+      <td>${chamado.ordem_servico}</td>
+      <td>${chamado.endereco}</td>
+      <td>${chamado.data_agenda}</td>
+      <td>${chamado.status}</td>
+      <td><button onclick="window.location.href='/samsung/empresas-icamento/chamado?id=${chamado.id}'">Ver</button></td>
     `;
     tbody.appendChild(tr);
   });

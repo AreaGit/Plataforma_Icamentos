@@ -14,6 +14,8 @@ const Chamados = require('./models/Chamados.js');
 const Chamados_Finalizados = require('./models/Chamados_Finalizados.js');
 const Precos_Icamentos_Televisores = require('./models/Precos_Icamentos_Televisores.js');
 const Precos_Icamentos_Geladeiras = require('./models/Precos_Icamentos_Geladeiras.js');
+const Precos_Icamentos_Televisores_Empresas = require('./models/Precos_Icamentos_Televisores_Empresas.js');
+const Precos_Icamentos_Geladeiras_Empresas = require('./models/Precos_Icamentos_Geladeiras_Empresas.js');
 
 // Middlewares
 app.use(express.static(path.join(__dirname, 'public')));
