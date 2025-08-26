@@ -222,7 +222,7 @@ app.post("/esqueci-senha", async (req, res) => {
       reset_token_expiration: expiracao,
     });
 
-    const resetLink = `http://10.0.0.118:3000/redefinir-senha?token=${token}&tipo=${tipo}`;
+    const resetLink = `portalicamento.com.br/redefinir-senha?token=${token}&tipo=${tipo}`;
 
     const mensagemStatus = `
       <p>Olá,</p>

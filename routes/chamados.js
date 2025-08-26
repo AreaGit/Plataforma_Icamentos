@@ -189,7 +189,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
 
     const empresa_telefone = empresa?.telefone;
     const empresa_nome = empresa.nome;
-    let link = `areapromocional.com.br/samsung/chamado-detalhes?id=${novoChamado.id}`;
+    let link = `portalicamento.com.br/samsung/chamado-detalhes?id=${novoChamado.id}`;
 
     let mensagem = `Olá! ${empresa_nome}\nTudo certo?\nSeu chamado de Içamento ${novoChamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG
     `;

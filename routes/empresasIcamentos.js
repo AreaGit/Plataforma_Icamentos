@@ -297,7 +297,7 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
     chamado.boletoId = boleto.id;
     chamado.vencimentoBoleto = vencimento;
 
-    let link_pedido = `areapromocional.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
+    let link_pedido = `portalicamento.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
 
     let mensagemNfse = `Olá ${nome}, informamos que o seu chamado de IÇAMENTO foi finalizado com sucesso ✅
 
