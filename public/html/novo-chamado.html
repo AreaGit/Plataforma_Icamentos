@@ -91,6 +91,17 @@
         <option value="SIM">SIM</option>
         <option value="NÃO">NÃO</option>
       </select>      
+
+      <!-- Campos adicionais que só aparecem quando SIM -->
+      <div id="art-info" style="display: none; margin-top: 10px; padding: 10px;">
+        <label for="art_nome">Nome do Responsável pela ART</label>
+        <br>
+        <input type="text" id="art_nome" placeholder="Informe o nome do responsável">
+        <br>
+        <label for="art_cpf">CPF do Responsável pela ART</label>
+        <br>
+        <input type="text" id="art_cpf" placeholder="Informe o CPF" maxlength="14">
+      </div>
         
       <label for="data_agendada">Data Agendada (mínimo 48 horas)</label>
       <input type="date" name="data_agendada" id="data_agendada" required>

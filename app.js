@@ -7,6 +7,7 @@ const cadastros = require('./routes/cadastros.js');
 const admin = require('./routes/admin.js'); 
 const chamados = require('./routes/chamados.js');
 const empresasIcamentos = require('./routes/empresasIcamentos.js');
+const empresaRoutes = require('./routes/empresa.js');
 const Empresas = require('./models/Empresas');
 const Usuarios_Autorizados = require('./models/Usuarios_Autorizados');
 const Empresas_Icamento = require('./models/Empresas_Icamento');
@@ -25,6 +26,7 @@ app.use('/', cadastros);
 app.use('/', admin);
 app.use('/', chamados);
 app.use('/', empresasIcamentos);
+app.use('/', empresaRoutes);
 
 // Rotas
 app.get('/', (req, res) => {
@@ -37,6 +39,16 @@ app.get('/samsung/', (req, res) => {
         res.send(html);
     } catch (error) {
         console.error('Erro ao carregar o login.html:', error);
+        res.status(500).send('Erro interno no servidor.');
+    }
+});
+
+app.get('/samsung/perfil', (req, res) => {
+    try {
+        const perfilHtmlContent = fs.readFileSync(path.join(__dirname, './public/html/perfil.html'), 'utf-8');
+        res.send(perfilHtmlContent);
+    } catch (error) {
+        console.error('Erro ao carregar o perfil.html:', error);
         res.status(500).send('Erro interno no servidor.');
     }
 });

@@ -23,6 +23,30 @@ function fecharAvisoSucesso() {
 const form = document.getElementById('form-chamado');
 let enderecoCompleto
 
+// Mostrar/esconder campos de ART conforme escolha
+const artSelect = document.getElementById('art');
+const artInfo = document.getElementById('art-info');
+const artCpf = document.getElementById('art_cpf');
+
+artSelect.addEventListener('change', () => {
+  if (artSelect.value === 'SIM') {
+    artInfo.style.display = 'block';
+  } else {
+    artInfo.style.display = 'none';
+    document.getElementById('art_nome').value = '';
+    document.getElementById('art_cpf').value = '';
+  }
+});
+
+// Máscara simples de CPF
+artCpf.addEventListener('input', (e) => {
+  let v = e.target.value.replace(/\D/g, '');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  e.target.value = v;
+});
+
 function getCookie(cname) {
     let name = cname + "="
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -212,6 +236,8 @@ form.addEventListener('submit', async (e) => {
     formData.append('produto', document.getElementById('produto').value);
     formData.append('vt', document.getElementById('vt').value);
     formData.append('art', document.getElementById('art').value);
+    formData.append('art_nome', document.getElementById('art_nome').value || '');
+    formData.append('art_cpf', document.getElementById('art_cpf').value || '');
     formData.append('data_agendada', document.getElementById('data_agendada').value);
     formData.append('horario_agenda', document.getElementById('horario').value);
     formData.append('informacoes_uteis', document.getElementById('informacoes_uteis').value);

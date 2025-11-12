@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meu Perfil - Içamentos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/perfil.css" />
+</head>
+<body>
+  <header>
+    <h1>Meu Perfil</h1>
+    <button id="voltar-btn">Voltar</button>
+  </header>
+
+  <main class="perfil-container">
+    <form id="formPerfil">
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" name="nome" required />
+
+      <label for="telefone">Telefone</label>
+      <input type="text" id="telefone" name="telefone" required />
+
+      <label for="senha">Nova Senha (opcional)</label>
+      <input type="password" id="senha" name="senha" placeholder="Digite uma nova senha" />
+
+      <button type="submit" class="salvar-btn">Salvar Alterações</button>
+    </form>
+
+    <div id="mensagem" class="mensagem"></div>
+  </main>
+
+  <script src="../js/perfil.js"></script>
+</body>
+</html>

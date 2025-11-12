@@ -135,6 +135,8 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       produto,
       vt,
       art,
+      art_nome, 
+      art_cpf,
       data_agendada,
       horario_agenda,
       informacoes_uteis,
@@ -174,6 +176,8 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
       produto: produto,
       vt: vt,
       art: art,
+      art_nome: art_nome, 
+      art_cpf: art_cpf,
       data_agenda: dataFormatada.toDate(), // já convertido para formato válido
       horario_agenda: horario_agenda,
       informacoes_uteis,

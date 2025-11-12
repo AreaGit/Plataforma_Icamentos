@@ -1,6 +1,6 @@
 const axios = require('axios');
 require('dotenv').config();
-const asaas_key = ('');
+const asaas_key = ('$aact_prod_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjgwNDA4ZDQ2LWQwOTQtNGZjMy1hN2Q2LTVhODhhYTM3ZjY4Njo6JGFhY2hfMzYxYjc4Y2ItMWVmMi00NjY2LWE0ZDEtMTUxNDVjMGFkYTI0');
 
 if(asaas_key) {
     console.log("PRODUÇÃO")
@@ -48,39 +48,43 @@ EXEMPLO DE RESPONSE DE CLIENTE CRIADO EM AMBIENTE SANDBOX DO ASAAS
 
 // Criação de Cliente
 async function criarClienteAsaas(dadosCliente) {
-    const options = {
+  const numero = dadosCliente.addressNumber && dadosCliente.addressNumber.trim() !== ''
+    ? dadosCliente.addressNumber
+    : 'SN'; // ✅ substitui vazio por "SN"
+
+  const options = {
     method: 'POST',
     url: 'https://api.asaas.com/v3/customers',
     headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        access_token: asaas_key
+      accept: 'application/json',
+      'content-type': 'application/json',
+      access_token: asaas_key
     },
     data: {
-        name: dadosCliente.name,
-        cpfCnpj: dadosCliente.document,
-        email: dadosCliente.email,
-        phone: dadosCliente.phone,
-        mobilePhone: dadosCliente.phone,
-        address: dadosCliente.address,
-        addressNumber: dadosCliente.addressNumber,
-        complement: dadosCliente.complement,
-        province: dadosCliente.province,
-        postalCode: dadosCliente.postalCode,
-        externalReference: dadosCliente.externalReference,
-        notificationDisabled: true,
-        groupName: 'Grupo Içamentos SSG',
-        company: 'Area'
+      name: dadosCliente.name,
+      cpfCnpj: dadosCliente.document,
+      email: dadosCliente.email,
+      phone: dadosCliente.phone,
+      mobilePhone: dadosCliente.phone,
+      address: dadosCliente.address,
+      addressNumber: numero, // 🔹 Garantido nunca vazio
+      complement: dadosCliente.complement || '',
+      province: dadosCliente.province || '',
+      postalCode: dadosCliente.postalCode?.replace(/\D/g, ''),
+      externalReference: dadosCliente.externalReference,
+      notificationDisabled: true,
+      groupName: 'Grupo Içamentos SSG',
+      company: 'Area Promocional'
     }
-    };
+  };
 
-    try {
-        const res = await axios.request(options);
-        return res.data;
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
+  try {
+    const res = await axios.request(options);
+    return res.data;
+  } catch (err) {
+    console.error('❌ Erro ASAAS:', err.response?.data || err);
+    throw err;
+  }
 };
 
 // criarClienteAsaas();
@@ -232,17 +236,17 @@ async function agendarNfsAsaas(dadosNfs) {
             access_token: asaas_key
         },
         data: {
-            taxes: {retainIss: false, cofins: 0, csll: 0, inss: 0, ir: 0, pis: 0, iss: 5},
+            taxes: {retainIss: false, cofins: 0, csll: 0, inss: 0, ir: 0, pis: 0, iss: 2},
             payment: dadosNfs.payment,
             installment: null,
             customer: dadosNfs.customer,
-            serviceDescription: 'Nf referente ao Chamado Içamento SSG',
+            serviceDescription: `Nf referente ao Chamado Içamento ${dadosNfs.id_chamado} SSG`,
             observations: 'Nf referente ao Chamado Içamento SSG',
             externalReference: dadosNfs.externalReference,
             value: dadosNfs.value,
             deductions: 0,
             effectiveDate: dadosNfs.effectiveDate,
-            municipalServiceId: null,
+            municipalServiceId: '82258',
             municipalServiceCode: '16.01',
             municipalServiceName: 'AGENCIAMENTO DE TRANSPORTE',
             updatePayment: null

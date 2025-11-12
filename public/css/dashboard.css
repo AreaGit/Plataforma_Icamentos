@@ -29,26 +29,32 @@ body {
 }
 
 header {
-  background-color: var(--samsung-blue);
-  color: var(--white);
-  padding: 16px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #0057B8;
+  color: #fff;
+  padding: 15px 25px;
 }
 
-header h1 {
-  font-size: 24px;
+.header-buttons {
+  display: flex;
+  gap: 10px;
 }
 
-header button {
-  background-color: var(--flame-orange);
+#perfil-btn, #logout-btn {
+  background-color: #fff;
+  color: #0057B8;
   border: none;
-  padding: 8px 16px;
-  color: var(--white);
-  font-weight: bold;
+  padding: 10px 15px;
   border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#perfil-btn:hover, #logout-btn:hover {
+  background-color: #e6e6e6;
 }
 
 .dashboard-container {

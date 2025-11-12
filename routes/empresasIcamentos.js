@@ -48,7 +48,17 @@ const storage = multer.diskStorage({
   }
 });
 
+const storage2 = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/'); // Crie essa pasta se não existir
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
 const upload = multer({ storage: storage });
+const uploadDocs = multer({ storage: storage2 });
 
 app.get('/empresa-icamentos/chamados', async (req, res) => {
   try {
@@ -102,7 +112,7 @@ app.get('/empresa-icamentos/chamado/:id', async (req, res) => {
 
 app.get('/download-anexo', (req, res) => {
   const fileName = req.query.file;
-  const filePath = path.join(__dirname, 'uploads', path.basename(fileName));
+  const filePath = path.join(__dirname, '../uploads', path.basename(fileName));
 
   res.download(filePath, err => {
     if (err) {
@@ -110,6 +120,82 @@ app.get('/download-anexo', (req, res) => {
       res.status(500).send('Erro ao baixar arquivo.');
     }
   });
+});
+
+// Upload de documentos do chamado agendado
+// ===============================
+// POST /empresa-icamentos/chamado/:id/documentos
+// ===============================
+app.post('/empresa-icamentos/chamado/:id/documentos', uploadDocs.array('arquivos_documentos', 10), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const arquivos = req.files;
+
+    console.log(arquivos);
+
+    if (!arquivos || arquivos.length === 0) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    }
+
+    // Caminho relativo para salvar no banco
+    const caminhosNovos = arquivos.map(file => '' + file.originalname);
+
+    const chamado = await Chamados.findByPk(id);
+    if (!chamado) return res.status(404).json({ error: 'Chamado não encontrado.' });
+
+    // Recupera anexos existentes e concatena
+    let anexosAtuais = [];
+
+    if (Array.isArray(chamado.anexos)) {
+      anexosAtuais = chamado.anexos;
+    } else if (typeof chamado.anexos === 'string') {
+      try {
+        anexosAtuais = JSON.parse(chamado.anexos);
+      } catch {
+        anexosAtuais = [];
+      }
+    }
+
+    // Concatena mantendo originais e removendo duplicatas
+    const anexosAtualizados = [...new Set([...anexosAtuais, ...caminhosNovos])];
+
+    // Atualiza o campo e o status
+    chamado.anexos = anexosAtualizados;
+    chamado.status = 'Em Execução';
+    await chamado.save();
+
+    const empresa = await Empresas.findByPk(chamado.empresa_id);
+    const nome = empresa.nome;
+    const numeroChamado = chamado.id;
+    const telefone = empresa.telefone
+    let link = `portalicamento.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
+    let mensagem;
+
+    mensagem = `Olá, ${nome}!\nTudo certo?
+      Seu chamado de içamento nº ${numeroChamado} está em execução neste momento, conforme o agendamento realizado anteriormente. 🏗️⚙️
+      
+      📌 Você pode acompanhar o andamento diretamente no nosso Portal Exclusivo para as Assistências Customer Services Samsung: ${link}
+      
+      Qualquer dúvida, é só nos chamar por aqui.
+      Obrigado!
+      Portal de Içamento SAMSUNG
+      `;
+      await enviarNotificacaoWhatsapp(telefone, mensagem);
+
+    console.log(`📂 ${caminhosNovos.length} documento(s) adicionados ao chamado ID: ${chamado.id}`);
+    console.log(`✅ Status atualizado para "Em Execução"`);
+
+    res.json({
+      success: true,
+      message: 'Documentos enviados e status atualizado para Em Execução.',
+      files: caminhosNovos,
+      totalAnexos: anexosAtualizados.length,
+      novoStatus: chamado.status
+    });
+  } catch (err) {
+    console.error('❌ Erro ao enviar documentos:', err);
+    res.status(500).json({ error: 'Erro interno ao enviar documentos.' });
+  }
 });
 
 app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
@@ -142,7 +228,7 @@ app.put('/empresa-icamentos/chamado/:id/status', async (req, res) => {
     const numeroChamado = chamado.id;
     const dataHora = chamado.data_agenda;
     const telefone = empresa.telefone
-    let link = `areapromocional.com.br/samsung/chamados-detalhes?=id${chamado.id}`;
+    let link = `portalicamento.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
     let mensagem;
 
     if(status === "Agendamento") {
@@ -272,11 +358,20 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
     const boletoUrl = boleto.bankSlipUrl;
     const vencimento = boleto.dueDate;
 
+    // 🟢 Converte a data ISO (YYYY-MM-DD) para formato brasileiro (DD/MM/YYYY)
+    function formatarDataBrasil(dataISO) {
+      const [ano, mes, dia] = dataISO.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+    
+    const vencimentoBR = formatarDataBrasil(vencimento);
+
     // Emitir NFS-e Asaas
     const hojeComHifen = new Date().toISOString().split('T')[0];
     const dadosNfs = {
       payment: boleto.id,
       customer: chamado.customer_id,
+      id_chamado: chamado.id,
       externalReference: Math.floor(Math.random() * 999) + 1,
       value: chamado.amount,
       effectiveDate: hojeComHifen
@@ -308,7 +403,7 @@ app.post('/empresa-icamentos/finalizar-chamado/:id', upload.array('fotos', 10), 
 📄 Seguem abaixo a NFS-e e o boleto referente a este serviço:
 
 💰 *Boleto:* ${boletoUrl}  
-📅 *Vencimento:* ${dataBoletoIcamento}  
+📅 *Vencimento:* ${vencimentoBR}  
 🧾 *NFS-e:* ${nfseUrl}
 
 Qualquer dúvida, estamos à disposição!

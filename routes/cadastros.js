@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const XLSX = require("xlsx");
 const Empresas = require('../models/Empresas');
 const Usuarios_Autorizados = require('../models/Usuarios_Autorizados');
 const { criarClienteAsaas } = require('./api/asaas');
@@ -35,13 +36,13 @@ async function enviarEmailNotificacao(destinatario, assunto, corpo) {
     port: 465,                 // Porta para SSL (465)
     secure: true,              // Usar conexão segura (SSL)
     auth: {
-      user: 'atendimento@areapromocional.com.br',  // E-mail que você vai usar para enviar
-      pass: 'Z1mb@bue',                    // Senha do e-mail
+      user: 'no-reply@portalicamento.com.br',  // E-mail que você vai usar para enviar
+      pass: 'Z1mb@bue1',                    // Senha do e-mail
     },
   })
 
   const info = await transporter.sendMail({
-    from: 'atendimento@areapromocional.com.br',
+    from: 'no-reply@portalicamento.com.br',
     to: destinatario,
     subject: assunto,
     html: corpo,
@@ -49,6 +50,73 @@ async function enviarEmailNotificacao(destinatario, assunto, corpo) {
 
   console.log('E-mail enviado:', info);
 }
+
+// Função utilitária para ler planilha
+async function importarEmpresasDePlanilha(caminhoArquivo) {
+  try {
+    const workbook = XLSX.readFile(caminhoArquivo);
+    const sheetName = workbook.SheetNames[0];
+    const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log(`📊 Lendo planilha: ${sheetName} (${data.length} registros)`);
+
+    for (const [index, linha] of data.entries()) {
+      console.log(`➡️ [${index + 1}/${data.length}] Iniciando cadastro: ${linha.nome} (${linha.cnpj})`);
+
+      try {
+        // --- Sanitização básica ---
+        const cnpjFormatado = linha.cnpj.replace(/[^\d]+/g, '');
+        const telefoneFormatado = linha.telefone.replace(/\D/g, '');
+
+        // --- Criação do cliente ASAAS ---
+        const dadosCliente = {
+          name: linha.razao_social,
+          document: cnpjFormatado,
+          email: linha.email,
+          phone: telefoneFormatado,
+          address: linha.rua,
+          addressNumber: linha.numeroResidencia?.toString() || '',
+          complement: linha.complemento || '',
+          province: linha.bairro,
+          postalCode: linha.cep,
+          externalReference: Math.floor(Math.random() * 999) + 1
+        };
+
+        const clienteAsaas = await criarClienteAsaas(dadosCliente);
+
+        // --- Criação no banco local ---
+        const senhaHash = await bcrypt.hash(linha.senha.toString(), 10);
+
+        const novaEmpresa = await Empresas.create({
+          nome: linha.nome,
+          customer_asaas_id: clienteAsaas.id,
+          cep: linha.cep,
+          estado: linha.estado,
+          cidade: linha.cidade,
+          bairro: linha.bairro,
+          rua: linha.rua,
+          numeroResidencia: parseInt(linha.numeroRes),
+          complemento: linha.complemento,
+          razao_social: linha.razao,
+          cnpj: cnpjFormatado,
+          telefone: telefoneFormatado,
+          email: linha.email,
+          senha: senhaHash
+        });
+
+        console.log(`✅ Empresa cadastrada: ${novaEmpresa.nome} (ID ASAAS: ${clienteAsaas.id})`);
+      } catch (err) {
+        console.error(`❌ Erro ao cadastrar ${linha.nome || 'empresa desconhecida'}:`, err.message);
+      }
+    }
+
+    console.log('🎯 Importação concluída!');
+  } catch (err) {
+    console.error('❌ Erro ao ler planilha:', err.message);
+  }
+}
+
+//importarEmpresasDePlanilha("./routes/tab.xlsx")
 
 // Cadastro de empresa
 app.post('/cadastrar', async (req, res) => {
@@ -75,7 +143,7 @@ app.post('/cadastrar', async (req, res) => {
     const telefoneFormatado = formatarTelefone(telefone);
 
     const dadosCliente = {
-      name: nome,
+      name: razao,
       document: cnpjFormatado,
       email: email,
       phone: telefone,
@@ -222,7 +290,7 @@ app.post("/esqueci-senha", async (req, res) => {
       reset_token_expiration: expiracao,
     });
 
-    const resetLink = `portalicamento.com.br/redefinir-senha?token=${token}&tipo=${tipo}`;
+    const resetLink = `portalicamento.com.br/samsung/redefinir-senha?token=${token}&tipo=${tipo}`;
 
     const mensagemStatus = `
       <p>Olá,</p>

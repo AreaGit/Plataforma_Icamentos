@@ -42,6 +42,14 @@ const Chamados = db.define('chamados', {
         type: Sequelize.ENUM('Sim', 'Não'),
         allowNull: false
     },
+    art_nome: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+    }, 
+    art_cpf: {
+        type: Sequelize.STRING(255),
+        allowNull: true
+    },
     data_agenda: {
         type: Sequelize.DATEONLY,
         allowNull: false

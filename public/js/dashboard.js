@@ -68,3 +68,7 @@ document.getElementById('logout-btn').addEventListener('click', async() => {
         console.error('Erro ao fazer logout:', error);
     });  
 });
+
+document.getElementById("perfil-btn").addEventListener("click", () => {
+  window.location.href = "/samsung/perfil";
+});

@@ -1,6 +1,10 @@
+// ===============================
+// DETALHES DO CHAMADO - FRONTEND
+// ===============================
+
 window.addEventListener('load', function() {
-  // Quando a página carrega
-  document.querySelector('.loading-screen').style.display = 'none'; // Oculta a tela de carregamento
+  // Quando a página carrega, oculta a tela de loading
+  document.querySelector('.loading-screen').style.display = 'none';
 });
 
 let statusAtualChamado;
@@ -37,19 +41,17 @@ function aplicarEstiloStatus(status) {
 }
 
 function getCookie(cname) {
-    let name = cname + "="
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while(c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if(c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length)
-        }
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') c = c.substring(1);
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
     }
-    return "";
+  }
+  return "";
 }
 
 let tipo = "empresa";
@@ -60,15 +62,21 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
   const btn = document.getElementById('btnAvancarStatus');
   const formFinalizacao = document.getElementById('form-finalizacao');
   const form = document.getElementById("form-finalizar");
-  let isReload = 0;
+
+  // Esconde o botão se for "Agendado"
+  if (statusAtual === "Agendado") {
+    btn.style.display = "none";
+    return;
+  }
 
   if (proximoStatus && !statusFinal.includes(statusAtual)) {
     btn.style.display = 'inline-flex';
     btn.onclick = async () => {
       document.querySelector('.loading-screen').style.display = 'block';
+
       if (proximoStatus === "Finalizado") {
         formFinalizacao.style.display = "block";
-        window.location.reload();
+
         form.onsubmit = async (e) => {
           e.preventDefault();
           btn.textContent = "Finalizando...";
@@ -87,30 +95,24 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
           formData.append("cliente_presente", cliente_presente);
           formData.append("produto_ok", produto_ok);
           formData.append("tecnico_presente", tecnico_presente);
-          formData.append("horario_finalizacao", horario);
-          formData.append("obs_finalizacao", obs);
           for (let i = 0; i < fotos.length; i++) {
             formData.append("fotos[]", fotos[i]);
           }
 
           try {
-            const res = await fetch(`/empresas-icamento/finalizar-chamado/${chamadoId}`, {
+            const res = await fetch(`/empresa-icamentos/finalizar-chamado/${chamadoId}`, {
               method: "POST",
               body: formData,
             });
 
             if (res.ok) {
               document.querySelector('.loading-screen').style.display = 'none';
-              aplicarEstiloStatus("Finalizado");
-              btn.style.display = "none";
               alert("Chamado finalizado com sucesso!");
-              formFinalizacao.style.display = "none";
+              window.location.reload(); // ✅ Recarrega após finalizar
             } else {
-              document.querySelector('.loading-screen').style.display = 'none';
               alert("Erro ao finalizar chamado.");
             }
           } catch (err) {
-            document.querySelector('.loading-screen').style.display = 'none';
             console.error(err);
             alert("Erro ao enviar dados.");
           }
@@ -118,6 +120,7 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
           btn.disabled = false;
           btn.textContent = "Avançar Status";
         };
+
       } else {
         btn.textContent = "Atualizando...";
         btn.disabled = true;
@@ -132,7 +135,8 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
           if (res.ok) {
             document.querySelector('.loading-screen').style.display = 'none';
             aplicarEstiloStatus(proximoStatus);
-            configurarBotaoAvancarStatus(proximoStatus, chamadoId);
+            alert(`Status atualizado para "${proximoStatus}" com sucesso!`);
+            window.location.reload(); // ✅ Recarrega após sucesso
           } else {
             document.querySelector('.loading-screen').style.display = 'none';
             alert("Erro ao atualizar status.");
@@ -150,16 +154,18 @@ function configurarBotaoAvancarStatus(statusAtual, chamadoId) {
     document.querySelector('.loading-screen').style.display = 'none';
     btn.style.display = 'none';
   }
-}
+} 
 
 async function carregarDetalhes() {
   const urlParams = new URLSearchParams(window.location.search);
   const chamadoId = urlParams.get('id');
-  const res = await fetch(`/chamado/${chamadoId}`);
-  const chamado = await res.json();
 
+  const res = await fetch(`/empresa-icamentos/chamado/${chamadoId}`);
+  const chamado = await res.json();
+  console.log(chamado);
   statusAtualChamado = chamado.status;
 
+  // Preenche os campos
   document.getElementById('id').textContent = chamado.id;
   document.getElementById('titulo').textContent = chamado.ordem_servico;
   document.getElementById('endereco').textContent = chamado.endereco;
@@ -167,95 +173,95 @@ async function carregarDetalhes() {
   document.getElementById('data_agenda').textContent = `${chamado.data_agenda} - ${chamado.horario_agenda}`;
   document.getElementById('status').textContent = chamado.status;
   document.getElementById('observacoes').textContent = chamado.observacoes || "Nenhuma";
-  document.getElementById('valor').textContent = "R$ " + chamado.amount_company.toFixed(2);
+  document.getElementById('vt').textContent = chamado.vt || "Nenhuma";
 
-  // Mostrar campos de data apenas se o status for "Aguardando"
-if (chamado.status === "Aguardando") {
-  const divPropor = document.getElementById('propor-data');
-  const divNovaProposta = document.getElementById('nova-data-proposta');
-
-  // Verifica se já existe uma nova proposta
-    if (chamado.nova_data_proposta) {
-    document.getElementById('nova-data-proposta').style.display = 'block';
-    const dt = new Date(chamado.nova_data_proposta);
-    document.getElementById('data-proposta').textContent = dt.toLocaleString('pt-BR');
-    document.getElementById('propor-data').style.display = 'none';
-
-    // Mostrar botão "Aceitar Proposta" somente se o usuário NÃO for o proponente
-    const btnAceitar = document.getElementById('btnAceitarProposta');
-    if (chamado.proponenteId != userId || chamado.tipoProponente != tipo) {
-      btnAceitar.style.display = 'inline-block';
-      btnAceitar.onclick = async () => {
-        document.querySelector('.loading-screen').style.display = 'block';
-        const res = await fetch(`/chamado/${chamado.id}/aceitar-proposta`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, tipo })
-        });
-
-        if (res.ok) {
-          document.querySelector('.loading-screen').style.display = 'none';
-          alert("Nova data aceita!");
-          window.location.reload();
-        } else {
-          document.querySelector('.loading-screen').style.display = 'none';
-          const data = await res.json();
-          alert("Erro ao aceitar proposta: " + (data.error || 'Erro desconhecido'));
-        }
-      };
-    } else {
-      btnAceitar.style.display = 'none';
-    }
-
+  if (chamado.art?.toLowerCase() === "sim") {
+    document.getElementById('art').innerHTML = `
+      <p><strong>ART:</strong> Sim</p>
+      <p><strong>Responsável:</strong> ${chamado.art_nome || "Não informado"}</p>
+      <p><strong>CPF:</strong> ${chamado.art_cpf || "Não informado"}</p>
+    `;
   } else {
-    document.getElementById('nova-data-proposta').style.display = 'none';
-    document.getElementById('propor-data').style.display = 'block';
+    document.getElementById('art').innerHTML = `<p><strong>ART:</strong> Não</p>`;
   }
-
-  document.getElementById('btnProporOutraData').onclick = () => {
-    document.getElementById('nova-data-proposta').style.display = 'none';
-    document.getElementById('propor-data').style.display = 'block';
-  };
-
-  document.getElementById("btnProporNovaData").onclick = async () => {
-    document.querySelector('.loading-screen').style.display = 'block';
-    const data = document.getElementById("data_input").value;
-    const hora = document.getElementById("hora_input").value;
-    if (!data || !hora) return alert("Escolha uma data e horário válido.");
-
-    const novaDataHora = `${data}T${hora}:00`;
-
-    const res = await fetch(`/chamado/${chamadoId}/propor-data`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ novaDataHora, userId, tipo })
-    });
-
-    if (res.ok) {
-      document.querySelector('.loading-screen').style.display = 'none';
-      alert("Nova data proposta com sucesso.");
-      window.location.reload();
-    } else {
-      document.querySelector('.loading-screen').style.display = 'none';
-      const data = await res.json();
-      alert("Erro: " + data.error);
-    }
-  };
-}
 
   aplicarEstiloStatus(chamado.status);
   configurarBotaoAvancarStatus(chamado.status, chamado.id);
 
+  // Renderizar anexos
   const anexosContainer = document.getElementById('anexos');
-  chamado.anexos.forEach(anexo => {
-    const link = document.createElement('button');
-    link.href = `/download-anexo?file=${encodeURIComponent(anexo)}`;
-    link.textContent = anexo.split('-').pop();
-    link.classList.add('botao-download');
-    link.setAttribute('download', '');
-    anexosContainer.appendChild(link);
-  });
+  if (Array.isArray(chamado.anexos)) {
+    chamado.anexos.forEach(anexo => {
+      const link = document.createElement('a');
+      link.href = `/download-anexo?file=${encodeURIComponent(anexo)}`;
+      link.textContent = anexo.split('-').pop();
+      link.classList.add('botao-download');
+      link.setAttribute('download', '');
+      anexosContainer.appendChild(link);
+    });
+  }
 
+  // ===========================
+  // SE STATUS = AGENDADO → UPLOAD DE DOCUMENTOS
+  // ===========================
+  if (chamado.status === "Agendado") {
+    const secaoDocs = document.getElementById('documentos-adicionais');
+    const btnEnviar = document.getElementById('btnEnviarDocumentos');
+    secaoDocs.style.display = 'block';
+
+    btnEnviar.addEventListener('click', async () => {
+      document.querySelector('.loading-screen').style.display = 'block';
+      const arquivos = document.getElementById('arquivos_documentos').files;
+
+      if (arquivos.length === 0) {
+        alert("Selecione pelo menos um arquivo antes de enviar.");
+        document.querySelector('.loading-screen').style.display = 'none';
+        return;
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < arquivos.length; i++) {
+        formData.append("arquivos_documentos", arquivos[i]);
+      }
+
+      btnEnviar.textContent = "Enviando...";
+      btnEnviar.disabled = true;
+
+      try {
+        const res = await fetch(`/empresa-icamentos/chamado/${chamado.id}/documentos`, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await res.json();
+        document.querySelector('.loading-screen').style.display = 'none';
+
+        if (res.ok) {
+          alert("Documentos enviados com sucesso!");
+          window.location.reload();
+          const lista = document.createElement('ul');
+          result.files.forEach(f => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="${f}" target="_blank">${f.split('/').pop()}</a>`;
+            lista.appendChild(li);
+          });
+          secaoDocs.appendChild(lista);
+        } else {
+          alert("Erro ao enviar documentos: " + (result.error || "Erro desconhecido"));
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao enviar documentos.");
+      }
+
+      btnEnviar.textContent = "Enviar Documentos";
+      btnEnviar.disabled = false;
+    });
+  }
+
+  // ===========================
+  // SE STATUS = EM EXECUÇÃO → FORM FINALIZAÇÃO
+  // ===========================
   if (chamado.status === "Em Execução") {
     document.getElementById('form-finalizacao').style.display = 'block';
     document.getElementById('btnAvancarStatus').style.display = 'none';
@@ -309,4 +315,5 @@ if (chamado.status === "Aguardando") {
   }
 }
 
+// Executa ao carregar
 carregarDetalhes();
