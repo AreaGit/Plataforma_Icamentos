@@ -1,3 +1,26 @@
+function get_cookie(cname) {
+    let name = cname + "="
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while(c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if(c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length)
+        }
+    }
+    return "";
+}
+
+let id_empresa = get_cookie("idEmpresa");
+let id_usuario = get_cookie("idUsuario");
+
+if (!id_empresa && !id_usuario) {
+    window.location.href = `/samsung/`;
+}
+
 // ===============================
 // DETALHES DO CHAMADO - FRONTEND
 // ===============================

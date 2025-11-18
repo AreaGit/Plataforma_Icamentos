@@ -1,19 +1,25 @@
 :root {
+  /* Cores principais do sistema */
   --samsung-blue: #1428A0;
   --sky-blue: #0689D8;
-  --cool-grey-9: #75787B;
-  --white: #FFFFFF;
-  --sun-yellow: #FFC600;
-  --flame-orange: #FF6900;
-  --berry-red: #E4002B;
-  --lotus-purple: #685BC7;
   --marine-blue: #0057B8;
-  --kelp-blue: #009CA6;
+
+  --sun-yellow: #FFC600;
   --ivy-green: #00B140;
-  --platinum: #E7E7E8;
-  --cool-grey-8: #A6A9AA;
+  --flame-orange: #FF6900;
+
+  --white: #ffffff;
   --cloud: #53565A;
   --coal: #000000;
+  --cool-grey-8: #A6A9AA;
+  --platinum: #E7E7E8;
+
+  /* Estilo premium */
+  --radius: 18px;
+  --blur: blur(18px);
+  --transition: .32s cubic-bezier(.34,.06,0,.99);
+  --shadow-soft: 0px 12px 28px rgba(0,0,0,0.12);
+  --shadow-hover: 0px 18px 40px rgba(0,0,0,0.18);
 }
 
 * {
@@ -22,195 +28,303 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background-color: var(--platinum);
-  color: var(--cloud);
+/* ============================
+      ANIMAÇÕES GLOBAIS
+============================ */
+
+@keyframes fade {
+  from { opacity: 0; filter: blur(8px); transform: translateY(20px); }
+  to   { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-8px); }
+}
+
+@keyframes slide-down {
+  from { opacity:0; transform: translateY(-10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ============================
+            BODY
+============================ */
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(145deg,#f1f1f1,#ffffff);
+  color: var(--cloud);
+  animation: fade .6s ease;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Glow azul de fundo */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(20,40,160,.25), transparent 70%);
+  filter: blur(90px);
+  z-index: -1;
+}
+
+/* ============================
+            HEADER
+============================ */
+
 header {
-  background-color: var(--samsung-blue);
+  background: rgba(20,40,160,0.6);
+  backdrop-filter: blur(16px);
   color: var(--white);
-  padding: 16px 32px;
+  padding: 20px 40px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  box-shadow: var(--shadow-soft);
 }
 
 header h1 {
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 900;
+  animation: float 5s infinite;
 }
 
 header button {
-  background-color: var(--flame-orange);
+  background: rgba(255,255,255,0.8);
   border: none;
-  padding: 8px 16px;
-  color: var(--white);
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  color: var(--marine-blue);
+  font-size: 16px;
   font-weight: bold;
-  border-radius: 6px;
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
+  transition: var(--transition);
 }
 
-button {
-  padding: 12px;
-  background-color: var(--samsung-blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+header button:hover {
+  transform: translateY(-4px);
+  background: var(--white);
+  box-shadow: var(--shadow-hover);
 }
+
+/* ============================
+          CONTAINER
+============================ */
 
 .novo-chamado-container {
-  padding: 32px;
-  max-width: 900px;
-  margin: auto;
+  padding: 40px;
+  max-width: 1100px;
+  margin: 40px auto;
+  animation: fade .8s ease;
 }
 
-h2 {
-  margin-bottom: 24px;
-  color: var(--cloud);
+.novo-chamado-container h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--samsung-blue);
+  margin-bottom: 25px;
 }
+
+/* ============================
+            FORM
+============================ */
 
 .chamado-form {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(16px);
+
+  padding: 35px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 22px;
+
+  animation: fade .9s ease;
 }
 
 .chamado-form label {
-  text-align: left;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--cloud);
+  margin-bottom: 5px;
 }
 
 .chamado-form input,
-.chamado-form select, 
+.chamado-form select,
 .chamado-form textarea {
-  padding: 12px;
-  border: 1px solid var(--cool-grey-8);
-  border-radius: 8px;
+  padding: 15px;
+  border: 2px solid var(--cool-grey-8);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.85);
+  transition: var(--transition);
   font-size: 16px;
 }
 
-.chamado-form textarea {
+.chamado-form input:focus,
+.chamado-form select:focus,
+.chamado-form textarea:focus {
+  border-color: var(--sky-blue);
+  transform: scale(1.02);
+  box-shadow: 0 0 14px rgba(20,40,160,0.25);
+  background: var(--white);
+  outline: none;
+}
+
+textarea {
+  min-height: 120px;
   resize: vertical;
-  min-height: 100px;
 }
 
-.checklist {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ============================
+     CAMPOS CONDICIONAIS ART
+============================ */
+
+#art-info {
+  background: rgba(235,240,255,.8);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+  border-left: 5px solid var(--samsung-blue);
+  border-radius: var(--radius);
+
+  animation: slide-down .4s ease;
 }
 
-.checklist div {
-  display: flex;
-  align-items: center;
-}
-
-.checklist input[type="checkbox"] {
-  margin-right: 8px;
-}
-
-.chamado-form button {
-  padding: 12px;
-  background-color: var(--samsung-blue);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.chamado-form button:hover {
-  background-color: var(--sky-blue);
-}
+/* ============================
+      SEÇÃO DE VALOR
+============================ */
 
 .valor-icamento-section {
-  margin-top: 32px;
-  padding: 24px;
-  background-color: var(--white);
+  background: rgba(255,255,255,0.7);
+  padding: 25px;
+  border-radius: var(--radius);
   border: 2px solid var(--cool-grey-8);
-  border-radius: 12px;
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--coal);
+  box-shadow: var(--shadow-soft);
 }
 
 .valor-icamento-section h3 {
-  margin-bottom: 8px;
+  font-size: 20px;
   color: var(--cloud);
-  font-size: 18px;
+  margin-bottom: 10px;
 }
 
-#valor-icamento {
+/* ============================
+        BOTÃO PRINCIPAL
+============================ */
+
+button,
+.chamado-form button {
+  background: linear-gradient(135deg, var(--samsung-blue), var(--sky-blue));
+  color: white;
+  padding: 14px 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius);
+
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+}
+
+button:hover {
+  transform: translateY(-5px) scale(1.03);
+  background: var(--sky-blue);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ============================
+           ALERTAS
+============================ */
+
+.alerta {
+  padding: 18px;
+  border-radius: var(--radius);
+  position: fixed;
+  top: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 380px;
+
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-strong);
+
+  animation: fade .6s ease;
+
   display: none;
 }
 
-.loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Certifique-se de que esteja acima de tudo */
-}
-
-.spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3); /* Borda circular */
-  border-top: 4px solid #fff;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite; /* Animação de rotação */
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.alerta {
-  padding: 15px;
-  margin-bottom: 20px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  position: fixed; /* Para posicionar o botão de fechar */
-  top: 5%;
-  left: 65%;
-  width: 30vw;
-  display: none; /* Inicialmente escondido */
-}
-
 .alerta-aviso {
-  color: #8a6d3b;
-  background-color: #fcf8e3;
-  border-color: #faebcc;
+  background: rgba(255,230,140,0.9);
+  color: #6a5400;
 }
 
 .alerta-aviso-sucesso {
+  background: rgba(0,185,60,0.9);
   color: white;
-  background-color: #24a034;
-}
-
-.icone {
-  margin-right: 8px;
 }
 
 .fechar {
   position: absolute;
-  top: 5px;
-  right: 10px;
+  top: 8px;
+  right: 12px;
   cursor: pointer;
-  font-size: 1.2em;
+  font-size: 20px;
+}
+
+/* ============================
+        LOADING SCREEN
+============================ */
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 6px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  animation: spin .9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================
+        RESPONSIVIDADE
+============================ */
+
+@media (max-width: 700px) {
+  .novo-chamado-container {
+    padding: 20px;
+  }
+
+  .chamado-form {
+    padding: 25px;
+  }
+
+  header h1 {
+    font-size: 20px;
+  }
 }

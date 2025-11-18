@@ -5,228 +5,307 @@
   --cool-grey-9: #75787B;
   --white: #FFFFFF;
 
-  /* Paleta Secundária */
+  /* Secundárias */
   --sun-yellow: #FFC600;
   --flame-orange: #FF6900;
-  --berry-red: #E4002B;
-  --plum-purple: #C800A1;
+  --ivy-green: #00B140;
   --lotus-purple: #685BC7;
   --marine-blue: #0057B8;
-  --jay-blue: #00A9E0;
-  --kelp-blue: #009CA6;
-  --ivy-green: #00B140;
 
-  /* Tons de Cinza e Neutros */
+  /* Neutras */
   --platinum: #E7E7E8;
-  --silver: #888B8D;
   --cool-grey-8: #A6A9AA;
   --cloud: #53565A;
-  --coal: #000000;
+
+  /* Estilo Premium */
+  --blur: blur(16px);
+  --radius: 20px;
+  --shadow-soft: 0px 10px 25px rgba(0,0,0,0.08);
+  --shadow-strong: 0px 18px 45px rgba(0,0,0,0.18);
+  --transition: .34s cubic-bezier(.34,.06,0,.99);
 }
 
+/* ----------------------------------------------------
+                ANIMAÇÕES GERAIS
+------------------------------------------------------- */
+@keyframes fade {
+  0% { opacity: 0; filter: blur(6px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ----------------------------------------------------
+                        BODY
+------------------------------------------------------- */
 body {
-  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  background-color: var(--platinum);
-  color: var(--cloud);
   margin: 0;
   padding: 0;
+  font-family: "Roboto", sans-serif;
+  background: linear-gradient(135deg, #e5e5e5, #ffffff);
+  animation: fade 1s ease;
+  overflow-x: hidden;
 }
 
+/* luz suave de fundo */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(20,40,160,0.25), transparent 70%);
+  filter: blur(90px);
+  z-index: -1;
+}
+
+/* ----------------------------------------------------
+                  CONTAINER PRINCIPAL
+------------------------------------------------------- */
 .container {
-  max-width: 1000px;
-  margin: 40px auto;
-  background: var(--white);
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 1100px;
+  margin: 70px auto;
+  padding: 45px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: var(--radius);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-strong);
+  animation: pop .8s ease;
 }
 
+/* ----------------------------------------------------
+                        TÍTULO
+------------------------------------------------------- */
 h1 {
-  font-size: 28px;
+  font-size: 36px;
+  font-weight: 900;
   color: var(--samsung-blue);
-  margin-bottom: 20px;
   text-align: center;
+  margin-bottom: 40px;
+  animation: float 5s infinite ease-in-out;
 }
 
+/* ----------------------------------------------------
+              CAMPOS DE INFORMAÇÕES
+------------------------------------------------------- */
 .detalhes-chamado {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
 }
 
 .campo {
-  background-color: var(--platinum);
-  padding: 20px;
-  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(14px);
+  padding: 22px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
   border-left: 6px solid var(--sky-blue);
+  transition: var(--transition);
+  animation: pop .7s ease;
+}
+
+.campo:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-strong);
 }
 
 .campo h3 {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--cool-grey-9);
-  margin-bottom: 8px;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .campo span {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--cloud);
-  margin: 0;
 }
 
+/* ----------------------------------------------------
+                        STATUS
+------------------------------------------------------- */
 #status {
   display: inline-block;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: bold;
-  background-color: var(--ivy-green);
-  color: var(--white);
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #00B140, #00912d);
+  color: white;
+  border-radius: 18px;
   font-size: 14px;
-}
-
-#btnAvancarStatus {
   font-weight: bold;
-  margin-left: 10px;
+  animation: float 4s infinite ease-in-out;
+  box-shadow: 0 6px 12px rgba(0,150,0,.25);
 }
 
+/* Botões */
+.botao-download {
+  background: linear-gradient(135deg, var(--sky-blue), var(--samsung-blue));
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+}
+
+.botao-download:hover {
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: var(--shadow-strong);
+}
+
+/* ----------------------------------------------------
+                    ANEXOS
+------------------------------------------------------- */
 .anexos {
-  margin-top: 30px;
+  margin-top: 45px;
 }
 
 .anexos h2 {
-  font-size: 22px;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--samsung-blue);
-  margin-bottom: 10px;
-}
-
-.anexos a {
-  display: block;
-  color: var(--marine-blue);
-  text-decoration: none;
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-}
-
-.anexos a:hover {
-  color: var(--plum-purple);
-  text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-  .detalhes-chamado {
-    grid-template-columns: 1fr;
-  }
+  margin-bottom: 12px;
 }
 
 .grid-anexos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
 }
 
-.botao-download {
-  background-color: var(--sky-blue);
-  color: var(--white);
-  border: none;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-align: center;
-  word-break: break-word;
+.grid-anexos .botao-download {
+  animation: pop .9s ease;
 }
 
-.botao-download:hover {
-  background-color: var(--samsung-blue);
-}
-
-.botao-download span {
-  display: inline-block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.botao-download.loading {
-  background-color: var(--platinum);
-  color: var(--cloud);
-  cursor: not-allowed;
-}
-
-.botao-voltar {
-  position: relative;
-  top: 10px;
-  left: 10px;
-  font-size: 18px;
-}
-
-#form-finalizacao {
-  background-color: var(--platinum);
-  padding: 20px;
-  border-radius: 12px;
-  border-left: 6px solid var(--ivy-green);
-}
-
-#form-finalizacao h2 {
-  color: var(--ivy-green);
-  font-size: 22px;
-  margin-bottom: 20px;
-}
-
+/* ----------------------------------------------------
+               FORMULÁRIOS DE FINALIZAÇÃO
+------------------------------------------------------- */
 .campo-form {
-  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
+  margin-bottom: 16px;
 }
 
 .campo-form label {
-  font-weight: 600;
-  color: var(--cloud);
+  font-weight: 700;
+  color: var(--cool-grey-9);
   margin-bottom: 6px;
 }
 
 .campo-form input,
 .campo-form select,
 .campo-form textarea {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--cool-grey-8);
+  padding: 14px;
+  border: 2px solid var(--cool-grey-8);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.8);
   font-size: 16px;
-  background-color: var(--white);
+  transition: var(--transition);
 }
 
+.campo-form input:focus,
+.campo-form select:focus,
+.campo-form textarea:focus {
+  border-color: var(--sky-blue);
+  box-shadow: 0 0 14px rgba(20,80,200,.25);
+  transform: scale(1.02);
+}
+
+/* ----------------------------------------------------
+                BOTÃO VOLTAR
+------------------------------------------------------- */
+.botao-voltar {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: var(--transition);
+  color: var(--samsung-blue);
+}
+
+.botao-voltar:hover {
+  background: var(--samsung-blue);
+  color: white;
+  transform: translateY(-6px);
+}
+
+/* ----------------------------------------------------
+                CARDS ESPECÍFICOS FORA DO MAIN
+------------------------------------------------------- */
+#nova-data-proposta,
+#propor-data {
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 28px;
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+  background: rgba(255,255,255,0.55);
+  box-shadow: var(--shadow-soft);
+  animation: pop .8s ease;
+}
+
+/* ----------------------------------------------------
+                  LOADING SCREEN
+------------------------------------------------------- */
 .loading-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
-  display: flex;
+  background: rgba(0,0,0,0.55);
+  display: none;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Certifique-se de que esteja acima de tudo */
+  backdrop-filter: blur(6px);
+  z-index: 999;
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3); /* Borda circular */
-  border-top: 4px solid #fff;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite; /* Animação de rotação */
+  border: 6px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  animation: spin 1s infinite linear;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ----------------------------------------------------
+                  RESPONSIVIDADE
+------------------------------------------------------- */
+@media (max-width: 780px) {
+  .container {
+    padding: 28px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .botao-voltar {
+    font-size: 16px;
+  }
 }

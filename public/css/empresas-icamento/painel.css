@@ -1,86 +1,240 @@
 :root {
+  /* Cores principais */
   --samsung-blue: #1428A0;
   --sky-blue: #0689D8;
-  --cool-grey-9: #75787B;
-  --white: #FFFFFF;
-  --sun-yellow: #FFC600;
-  --flame-orange: #FF6900;
-  --berry-red: #E4002B;
-  --plum-purple: #C800A1;
-  --lotus-purple: #685BC7;
   --marine-blue: #0057B8;
-  --jay-blue: #00A9E0;
-  --kelp-blue: #009CA6;
+
+  --sun-yellow: #FFC600;
   --ivy-green: #00B140;
-  --platinum: #E7E7E8;
-  --silver: #888B8D;
-  --cool-grey-8: #A6A9AA;
+  --flame-orange: #FF6900;
+
+  --white: #FFFFFF;
   --cloud: #53565A;
-  --coal: #000000;
+  --cool-grey-8: #A6A9AA;
+  --platinum: #E7E7E8;
+
+  /* Estilo Premium */
+  --radius: 16px;
+  --blur: blur(16px);
+  --transition: .32s cubic-bezier(.34,.06,0,.99);
+  --shadow-soft: 0 10px 25px rgba(0,0,0,.10);
+  --shadow-strong: 0 22px 55px rgba(0,0,0,.18);
 }
+
+/* ============================
+        ANIMAÇÕES
+============================ */
+
+@keyframes fade {
+  from { opacity: 0; filter: blur(6px); transform: translateY(15px); }
+  to   { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+
+/* ============================
+          GLOBAL
+============================ */
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: var(--platinum);
   margin: 0;
   padding: 0;
+  font-family: "Roboto", sans-serif;
+  background: linear-gradient(135deg,#f1f1f1,#ffffff);
+  color: var(--cloud);
+  animation: fade .6s ease;
+  overflow-x: hidden;
 }
+
+/* Glow azul */
+body::before {
+  content: "";
+  position: fixed;
+  top: -15%;
+  left: -15%;
+  width: 65vw;
+  height: 65vw;
+  background: radial-gradient(circle, rgba(20,40,160,.22), transparent 70%);
+  filter: blur(90px);
+  z-index: -1;
+}
+
+/* ============================
+         HEADER PREMIUM
+============================ */
 
 header {
-  background-color: var(--samsung-blue);
+  background: rgba(20,40,160,0.65);
+  backdrop-filter: blur(14px);
+  padding: 20px;
   color: var(--white);
-  padding: 1rem;
   text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: var(--shadow-strong);
+  animation: float 6s infinite ease-in-out;
 }
+
+/* ============================
+        FILTROS MODERNOS
+============================ */
 
 .filtros {
+  margin: 25px auto;
+  max-width: 1100px;
+
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-soft);
+
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 1rem;
-  background: var(--white);
   justify-content: center;
+  gap: 14px;
+
+  padding: 20px;
+  border-radius: var(--radius);
+  animation: fade .7s ease;
 }
 
-.filtros input, .filtros select, .filtros button {
-  padding: 10px;
-  border: 1px solid var(--cool-grey-8);
-  border-radius: 6px;
-  font-size: 1rem;
+.filtros input,
+.filtros select {
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 2px solid var(--cool-grey-8);
+  background: rgba(255,255,255,0.8);
+  transition: var(--transition);
+  font-size: 16px;
+  width: 180px;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+  transform: scale(1.04);
+  border-color: var(--sky-blue);
+  box-shadow: 0 0 14px rgba(20,40,160,0.25);
+  outline: none;
+  background: white;
 }
 
 .filtros button {
-  background-color: var(--sky-blue);
-  color: var(--white);
-  cursor: pointer;
+  padding: 12px 22px;
+  border-radius: var(--radius);
   border: none;
+  background: linear-gradient(135deg, var(--sky-blue), var(--samsung-blue));
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
 }
 
+.filtros button:hover {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: var(--shadow-strong);
+}
+
+/* ============================
+        TABELA PREMIUM
+============================ */
+
+.tabela-chamados {
+  max-width: 1100px;
+  margin: 30px auto;
+  animation: fade .8s ease;
+}
+
+/* Caixa da tabela (Glass) */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1rem auto;
-  max-width: 95%;
-  background-color: var(--white);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
-th, td {
-  padding: 12px;
-  border: 1px solid var(--platinum);
+/* Cabeçalho */
+thead tr {
+  background: linear-gradient(135deg, var(--samsung-blue), var(--marine-blue));
+}
+
+thead th {
+  padding: 14px;
+  color: white;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Células */
+td {
+  padding: 14px;
   text-align: center;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: rgba(255,255,255,0.8);
+  transition: var(--transition);
 }
 
-th {
-  background-color: var(--sky-blue);
-  color: var(--white);
+/* Hover de linha */
+tbody tr:hover td {
+  background: rgba(230,240,255,0.85);
+  transform: scale(1.01);
 }
 
+/* Botão Detalhes */
 td button {
-  background-color: var(--kelp-blue);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--sky-blue), var(--samsung-blue));
   color: white;
   border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+}
+
+td button:hover {
+  transform: translateY(-4px) scale(1.05);
+  background: var(--ivy-green);
+  box-shadow: var(--shadow-strong);
+}
+
+/* ============================
+        STATUS CORES
+============================ */
+
+td.status {
+  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: white;
+}
+
+.status-Aguardando { background: var(--sun-yellow); color: #000; }
+.status-Agendamento { background: var(--kelp-blue); }
+.status-Execução { background: var(--sky-blue); }
+.status-Finalizado { background: var(--ivy-green); }
+.status-No-Show { background: var(--flame-orange); }
+.status-Cancelado { background: var(--berry-red); }
+
+/* ============================
+        RESPONSIVIDADE
+============================ */
+
+@media (max-width: 800px) {
+  table {
+    font-size: 14px;
+  }
+
+  .filtros input,
+  .filtros select {
+    width: 100%;
+  }
 }

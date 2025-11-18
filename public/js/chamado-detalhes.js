@@ -1,3 +1,26 @@
+function getCookie(cname) {
+    let name = cname + "="
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while(c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if(c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length)
+        }
+    }
+    return "";
+}
+
+let id_empresa = getCookie("idEmpresa");
+let id_usuario = getCookie("idUsuario");
+
+if (!id_empresa && !id_usuario) {
+    window.location.href = `/samsung/`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const chamadoId = urlParams.get('id');

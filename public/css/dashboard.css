@@ -1,4 +1,5 @@
 :root {
+  /* Paleta já existente */
   --samsung-blue: #1428A0;
   --sky-blue: #0689D8;
   --cool-grey-9: #75787B;
@@ -11,131 +12,222 @@
   --kelp-blue: #009CA6;
   --ivy-green: #00B140;
   --platinum: #E7E7E8;
-  --cool-grey-8: #A6A9AA;
   --cloud: #53565A;
-  --coal: #000000;
+
+  /* Estilo Premium */
+  --radius: 18px;
+  --blur: blur(16px);
+  --shadow-soft: 0 10px 25px rgba(0,0,0,.10);
+  --shadow-strong: 0 22px 55px rgba(0,0,0,.18);
+  --transition: .32s cubic-bezier(.34,.06,0,.99);
 }
 
+/* ANIMAÇÕES */
+@keyframes fade {
+  from { opacity: 0; transform: translateY(15px); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* GLOBAL */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: var(--platinum);
+  background: linear-gradient(145deg, #f1f1f1, #ffffff);
+  min-height: 100vh;
   color: var(--cloud);
+  animation: fade .9s ease;
+  position: relative;
+  overflow-x: hidden;
 }
 
+/* BRILHO SUAVE DO FUNDO */
+body::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 70vw;
+  height: 70vw;
+  background: radial-gradient(circle, rgba(20,40,160,.25), transparent 70%);
+  filter: blur(90px);
+  z-index: -1;
+}
+
+/* HEADER FUTURISTA */
 header {
+  padding: 18px 32px;
+  background: rgba(0, 87, 184, 0.65);
+  backdrop-filter: blur(14px);
+  color: var(--white);
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #0057B8;
-  color: #fff;
-  padding: 15px 25px;
+
+  box-shadow: var(--shadow-strong);
+}
+
+header h1 {
+  font-weight: 800;
+  font-size: 30px;
+  animation: float 5s ease-in-out infinite;
 }
 
 .header-buttons {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 #perfil-btn, #logout-btn {
-  background-color: #fff;
-  color: #0057B8;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-weight: bold;
   border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  font-weight: 500;
+  background: rgba(255,255,255,0.75);
+  color: var(--marine-blue);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
 }
 
 #perfil-btn:hover, #logout-btn:hover {
-  background-color: #e6e6e6;
+  transform: translateY(-4px);
+  background: var(--white);
+  box-shadow: var(--shadow-strong);
 }
 
+/* CONTAINER PRINCIPAL */
 .dashboard-container {
-  padding: 32px;
-  max-width: 900px;
-  margin: auto;
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
 }
 
+/* HEADER INTERNO */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  animation: fade .8s ease;
 }
 
 .dashboard-header h2 {
-  font-size: 22px;
-  color: var(--cloud);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--samsung-blue);
 }
 
+/* BOTÃO NOVO CHAMADO */
 .novo-btn {
-  background-color: var(--kelp-blue);
+  background: linear-gradient(135deg, var(--kelp-blue), var(--ivy-green));
   color: var(--white);
-  padding: 10px 20px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
   text-decoration: none;
   font-weight: bold;
-  border-radius: 8px;
-  transition: background 0.3s ease;
+
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
 }
 
 .novo-btn:hover {
-  background-color: var(--ivy-green);
+  transform: translateY(-6px) scale(1.04);
+  background: var(--ivy-green);
+  box-shadow: var(--shadow-strong);
 }
 
+/* LISTA DE CHAMADOS */
 .chamados-lista {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  animation: fade 1.1s ease;
 }
 
+/* CARD DO CHAMADO (ULTRA MODERNO) */
 .chamado-card {
-  background-color: var(--white);
-  border-radius: 10px;
-  padding: 20px;
+  padding: 22px;
+  border-radius: var(--radius);
+
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-soft);
+
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  transition: var(--transition);
+  animation: fade .8s ease;
 }
 
-.chamado-card h3 {
-  margin-bottom: 4px;
+.chamado-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-strong);
 }
 
+/* STATUS */
 .status {
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 10px;
   font-weight: bold;
   font-size: 14px;
 }
 
 .status-aberto {
-  background-color: var(--sun-yellow);
+  background: var(--sun-yellow);
   color: #000;
 }
 
 .status-concluido {
-  background-color: var(--ivy-green);
+  background: var(--ivy-green);
   color: var(--white);
 }
 
+/* BOTÃO DETALHES */
 .detalhes-btn {
-  background-color: var(--sky-blue);
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--sky-blue), var(--marine-blue));
   color: var(--white);
-  padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   text-decoration: none;
-  font-weight: 500;
-  transition: background 0.3s ease;
+  font-weight: bold;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
 }
 
 .detalhes-btn:hover {
-  background-color: var(--marine-blue);
+  background: var(--marine-blue);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-strong);
+}
+
+/* RESPONSIVO */
+@media (max-width: 700px) {
+
+  header h1 {
+    font-size: 22px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .chamado-card {
+    flex-direction: column;
+    gap: 14px;
+  }
 }
