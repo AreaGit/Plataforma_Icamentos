@@ -221,6 +221,10 @@ h1 {
   margin-bottom: 12px;
 }
 
+input#data_input {
+  width: 96%;
+}
+
 .campo input,
 .campo select {
   width: 100%;
@@ -253,6 +257,189 @@ h1 {
 .campo button:hover {
   transform: translateY(-5px) scale(1.02);
   background: var(--sky-blue);
+}
+
+.btn-aprovar {
+  background: linear-gradient(135deg, #00B140, #00912f);
+  color: white;
+  padding: 14px 26px;
+  border-radius: 18px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 12px;
+  box-shadow: var(--shadow-strong);
+  transition: var(--transition);
+}
+
+.btn-aprovar:hover {
+  transform: translateY(-6px) scale(1.04);
+  background: linear-gradient(135deg, #00c94b, #00a83c);
+}
+
+.btn-rejeitar {
+  background: linear-gradient(135deg, #E4002B, #b80022);
+  color: white;
+  padding: 14px 26px;
+  border-radius: 18px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: var(--shadow-strong);
+  transition: var(--transition);
+}
+
+.btn-rejeitar:hover {
+  transform: translateY(-6px) scale(1.04);
+  background: linear-gradient(135deg, #ff204c, #d40034);
+}
+
+/* ============================================================
+        MODAL BASE
+=============================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  animation: fade .3s ease-out;
+}
+
+
+.modal-overlay.active {
+    display: flex !important; 
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.modal-content {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(18px);
+  padding: 35px;
+  width: 90%;
+  max-width: 480px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-strong);
+  animation: pop .45s ease;
+  text-align: center;
+}
+
+/* Títulos */
+.modal-content h2 {
+  color: var(--samsung-blue);
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+/* Texto */
+.modal-text {
+  color: var(--cloud);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* Textarea */
+#motivoRejeicaoInput {
+  width: 100%;
+  height: 120px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 14px;
+  border: 2px solid var(--cool-grey-8);
+  resize: none;
+  outline: none;
+  background: rgba(255,255,255,0.8);
+  transition: .3s ease;
+}
+
+#motivoRejeicaoInput:focus {
+  border-color: var(--samsung-blue);
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+/* Botões */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-cancelar {
+  background: linear-gradient(135deg, #777, #444);
+  padding: 12px 18px;
+  border-radius: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.btn-cancelar:hover {
+  transform: translateY(-4px);
+}
+
+.btn-confirmar,
+.btn-confirmar-aprovar {
+  background: linear-gradient(135deg, #00B140, #00912f);
+  padding: 12px 20px;
+  border-radius: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.btn-confirmar:hover,
+.btn-confirmar-aprovar:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, #00d64c, #00b33a);
+}
+
+/* Botão vermelhão de rejeição */
+.btn-confirmar {
+  background: linear-gradient(135deg, #E4002B, #b80022) !important;
+}
+
+.btn-confirmar:hover {
+  background: linear-gradient(135deg, #ff204c, #d40034) !important;
+}
+
+/* ============================================================
+                      TOASTS ESTILO IOS
+=============================================================== */
+
+.toast {
+  position: fixed;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px 26px;
+  font-size: 16px;
+  border-radius: 14px;
+  color: white;
+  opacity: 0;
+  transition: all .45s ease;
+  z-index: 999999;
+  font-weight: 600;
+}
+
+.toast-sucesso {
+  background: linear-gradient(135deg, #00B140, #008f32);
+}
+
+.toast-erro {
+  background: linear-gradient(135deg, #E4002B, #b80022);
+}
+
+.toast.mostrar {
+  top: 35px;
+  opacity: 1;
 }
 
 /* ----------------------------------------------------

@@ -1,74 +1,158 @@
+// ===========================
+// GET COOKIE
+// ===========================
 function getCookie(cname) {
-    let name = cname + "="
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while(c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if(c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length)
-        }
+  const name = cname + "=";
+  const decoded = decodeURIComponent(document.cookie);
+  const parts = decoded.split(";");
+
+  for (let p of parts) {
+    while (p.charAt(0) === " ") p = p.substring(1);
+    if (p.indexOf(name) === 0) return p.substring(name.length);
+  }
+  return "";
+}
+
+// ===========================
+// COOKIES VINDOS DO LOGIN
+// ===========================
+const authTipo = getCookie("authTipo");                           // admin / empresa / autorizado
+const authAdminId = getCookie("authAdminId");                     // se admin
+const authEmpresaId = getCookie("authEmpresaId");                 // se empresa OU se autorizado
+const authUsuarioAutorizadoId = getCookie("authUsuarioAutorizadoId"); // se autorizado
+
+// ===========================
+// VERIFICAÇÃO DE LOGIN
+// ===========================
+
+// 1️⃣ Não tem tipo? Não está logado
+if (!authTipo) {
+  window.location.href = "/samsung/";
+}
+
+// 2️⃣ Validar cada tipo de usuário separadamente:
+let autenticado = false;
+
+if (authTipo === "admin" && authAdminId) autenticado = true;
+
+if (authTipo === "empresa" && authEmpresaId) autenticado = true;
+
+if (authTipo === "autorizado" && authUsuarioAutorizadoId && authEmpresaId)
+  autenticado = true;
+
+// 3️⃣ Se nada disso for válido → não logado
+if (!autenticado) {
+  window.location.href = "/samsung/";
+}
+
+// ===========================
+// REGRAS ESPECÍFICAS DE UI
+// ===========================
+
+// Admin → NÃO pode criar chamado
+if (authTipo === "admin") {
+  const btnNovo = document.querySelector(".novo-btn");
+  if (btnNovo) btnNovo.style.display = "none";
+}
+// ===========================
+// CARREGAR CHAMADOS
+// ===========================
+async function carregarChamados() {
+  try {
+    let url;
+
+    // ADMIN → vê todos os chamados
+    if (authTipo === "admin") {
+      url = "/chamados";
     }
-    return "";
-}
 
-let idEmpresa = getCookie("idEmpresa");
-let idUsuario = getCookie("idUsuario");
+    // EMPRESA PROPRIETÁRIA → vê apenas seus chamados
+    else if (authTipo === "empresa") {
+      url = `/chamados/${authEmpresaId}`;
+    }
 
-if (!idEmpresa && !idUsuario) {
-    window.location.href = `/samsung/`;
-}
+    // USUÁRIO AUTORIZADO → vê chamados da empresa dele
+    else if (authTipo === "autorizado") {
+      url = `/chamados/${authEmpresaId}`;
+    }
 
-async function carregarChamado() {
-    const id = getCookie("idEmpresa") || getCookie("empresaId");
-    const response = await fetch(`/chamados/${id}`);
+    else {
+      console.warn("Tipo de usuário inválido. Redirecionando...");
+      window.location.href = "/samsung/";
+      return;
+    }
+
+    // Buscar lista de chamados
+    const response = await fetch(url);
     const chamados = await response.json();
-    const chamadosLista = document.getElementById('chamados-lista');
-    chamadosLista.innerHTML = '';
-    
-    console.log(chamados)
 
-    if(chamados) {
-        chamados.forEach(chamado => {
-            const div = document.createElement('div');
-            div.className = 'chamado-card';
-            div.innerHTML = `
-                <div>
-                    <h3>Chamado ${chamado.id}</h3>
-                    <p>Data: ${chamado.data_agenda}</p>
-                    <p>Status: <span class="status status-aberto">${chamado.status}</span></p>
-                </div>
-                <a href="/samsung/chamado-detalhes?id=${chamado.id}" class="detalhes-btn">Ver detalhes</a>
-            `;
-            chamadosLista.appendChild(div);
-        });
-    } else {
-        console.log("Não há chamados")
+    const container = document.getElementById("chamados-lista");
+    container.innerHTML = "";
+
+    if (!chamados || chamados.length === 0) {
+      container.innerHTML = `
+        <div class="chamado-card">
+          <p>Nenhum chamado encontrado.</p>
+        </div>
+      `;
+      return;
     }
+
+    chamados.forEach((ch) => {
+      const card = document.createElement("div");
+      card.classList.add("chamado-card");
+
+      const statusClass = ch.status
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace("/", "-");
+
+      card.innerHTML = `
+        <div>
+          <h3>Chamado #${ch.id}</h3>
+          <p><strong>Data:</strong> ${ch.data_agenda || "--"}</p>
+          <p><strong>Status:</strong>
+            <span class="status status-${statusClass}">
+              ${ch.status}
+            </span>
+          </p>
+        </div>
+
+        <a href="/samsung/chamado-detalhes?id=${ch.id}" class="detalhes-btn">
+          Ver detalhes
+        </a>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar chamados:", err);
+  }
 }
 
-carregarChamado();
+// Executar
+carregarChamados();
 
-document.getElementById('logout-btn').addEventListener('click', async() => {
-    fetch('/logout', {
-        method: 'GET',
-        credentials: 'include' // Garante que os cookies sejam enviados na requisição
-    })
-    .then(response => {
-        if (response.redirected) {
-            // Se o servidor redirecionar, redireciona também no frontend
-            window.location.href = response.url;
-        } else {
-            console.log("Logout feito, mas sem redirecionamento.");
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao fazer logout:', error);
-    });  
-});
-
+// ===========================
+// BOTÃO PERFIL
+// ===========================
 document.getElementById("perfil-btn").addEventListener("click", () => {
   window.location.href = "/samsung/perfil";
+});
+
+// ===========================
+// BOTÃO LOGOUT
+// ===========================
+document.getElementById("logout-btn").addEventListener("click", async () => {
+  fetch("/logout", {
+    method: "GET",
+    credentials: "include"
+  })
+    .then((response) => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      }
+    })
+    .catch((err) => console.error("Erro logout:", err));
 });

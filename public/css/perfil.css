@@ -57,7 +57,7 @@ body::before {
 /* HEADER Premium */
 
 header {
-  background: rgba(0, 87, 184, 0.65);
+  background: rgba(20,40,160,.70);
   backdrop-filter: blur(14px);
   padding: 18px 32px;
 

@@ -1,36 +1,19 @@
 :root {
-  /* Paleta já existente */
   --samsung-blue: #1428A0;
   --sky-blue: #0689D8;
-  --cool-grey-9: #75787B;
-  --white: #FFFFFF;
-  --sun-yellow: #FFC600;
-  --flame-orange: #FF6900;
-  --berry-red: #E4002B;
-  --lotus-purple: #685BC7;
-  --marine-blue: #0057B8;
   --kelp-blue: #009CA6;
   --ivy-green: #00B140;
-  --platinum: #E7E7E8;
+  --marine-blue: #0057B8;
+  --sun-yellow: #FFC600;
+  --berry-red: #E4002B;
+  --white: #FFFFFF;
   --cloud: #53565A;
 
-  /* Estilo Premium */
   --radius: 18px;
-  --blur: blur(16px);
+  --blur: blur(18px);
   --shadow-soft: 0 10px 25px rgba(0,0,0,.10);
-  --shadow-strong: 0 22px 55px rgba(0,0,0,.18);
+  --shadow-strong: 0 20px 55px rgba(0,0,0,.18);
   --transition: .32s cubic-bezier(.34,.06,0,.99);
-}
-
-/* ANIMAÇÕES */
-@keyframes fade {
-  from { opacity: 0; transform: translateY(15px); filter: blur(5px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
 }
 
 /* GLOBAL */
@@ -38,36 +21,46 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 body {
-  background: linear-gradient(145deg, #f1f1f1, #ffffff);
+  background: linear-gradient(145deg,#f2f2f2,#ffffff);
   min-height: 100vh;
   color: var(--cloud);
   animation: fade .9s ease;
-  position: relative;
   overflow-x: hidden;
 }
 
-/* BRILHO SUAVE DO FUNDO */
+/* BRILHO DO FUNDO */
 body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: -20%;
-  left: -20%;
-  width: 70vw;
-  height: 70vw;
-  background: radial-gradient(circle, rgba(20,40,160,.25), transparent 70%);
-  filter: blur(90px);
+  right: -20%;
+  width: 65vw;
+  height: 65vw;
+  background: radial-gradient(circle, rgba(20,40,160,.22), transparent 70%);
+  filter: blur(85px);
   z-index: -1;
 }
 
-/* HEADER FUTURISTA */
+@keyframes fade {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ========================= HEADER =========================== */
+
 header {
-  padding: 18px 32px;
-  background: rgba(0, 87, 184, 0.65);
-  backdrop-filter: blur(14px);
+  padding: 20px 40px;
+  background: rgba(20,40,160,.70);
+  backdrop-filter: blur(16px);
   color: var(--white);
 
   display: flex;
@@ -77,10 +70,15 @@ header {
   box-shadow: var(--shadow-strong);
 }
 
-header h1 {
-  font-weight: 800;
-  font-size: 30px;
-  animation: float 5s ease-in-out infinite;
+.header-left h1 {
+  font-size: 28px;
+  font-weight: 900;
+  animation: float 5s infinite ease-in-out;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  opacity: .9;
 }
 
 .header-buttons {
@@ -88,146 +86,172 @@ header h1 {
   gap: 12px;
 }
 
-#perfil-btn, #logout-btn {
-  padding: 10px 16px;
+.header-buttons button {
+  background: rgba(255,255,255,0.85);
+  padding: 10px 18px;
   border-radius: var(--radius);
-  font-weight: bold;
   border: none;
-  background: rgba(255,255,255,0.75);
   color: var(--marine-blue);
+  font-weight: bold;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   transition: var(--transition);
-  backdrop-filter: blur(8px);
   box-shadow: var(--shadow-soft);
 }
 
-#perfil-btn:hover, #logout-btn:hover {
+.header-buttons button:hover {
   transform: translateY(-4px);
   background: var(--white);
   box-shadow: var(--shadow-strong);
 }
 
-/* CONTAINER PRINCIPAL */
+/* ========================= CONTAINER =========================== */
+
 .dashboard-container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 40px auto;
-  padding: 20px;
+  padding: 0 25px;
 }
 
-/* HEADER INTERNO */
+/* Título dos chamados */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
-  animation: fade .8s ease;
+  margin-bottom: 25px;
 }
 
 .dashboard-header h2 {
   font-size: 26px;
   font-weight: 800;
   color: var(--samsung-blue);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* BOTÃO NOVO CHAMADO */
+/* Botão novo chamado */
 .novo-btn {
   background: linear-gradient(135deg, var(--kelp-blue), var(--ivy-green));
-  color: var(--white);
   padding: 12px 20px;
   border-radius: var(--radius);
-  text-decoration: none;
   font-weight: bold;
-
-  transition: var(--transition);
+  text-decoration: none;
+  color: var(--white);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
   box-shadow: var(--shadow-soft);
+  transition: var(--transition);
 }
 
 .novo-btn:hover {
-  transform: translateY(-6px) scale(1.04);
-  background: var(--ivy-green);
+  transform: translateY(-5px) scale(1.03);
   box-shadow: var(--shadow-strong);
 }
 
-/* LISTA DE CHAMADOS */
+/* ========================= LISTA DE CHAMADOS =========================== */
+
 .chamados-lista {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  animation: fade 1.1s ease;
 }
 
-/* CARD DO CHAMADO (ULTRA MODERNO) */
+/* CARD DO CHAMADO  */
 .chamado-card {
+  background: rgba(255,255,255,0.75);
   padding: 22px;
   border-radius: var(--radius);
-
-  background: rgba(255,255,255,0.75);
   backdrop-filter: var(--blur);
   box-shadow: var(--shadow-soft);
-
   display: flex;
   justify-content: space-between;
-
   transition: var(--transition);
-  animation: fade .8s ease;
 }
 
 .chamado-card:hover {
-  transform: translateY(-8px) scale(1.02);
+  transform: translateY(-5px) scale(1.02);
   box-shadow: var(--shadow-strong);
 }
 
-/* STATUS */
-.status {
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 14px;
+.chamado-card div {
+  line-height: 35px;
 }
 
-.status-aberto {
+/* Status */
+.status {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.status-Pendente,
+.status-Aguardando {
   background: var(--sun-yellow);
   color: #000;
 }
 
-.status-concluido {
+.status-Finalizado {
   background: var(--ivy-green);
   color: var(--white);
 }
 
-/* BOTÃO DETALHES */
+.status-Cancelado,
+.status-Rejeitado {
+  background: var(--berry-red);
+  color: var(--white);
+}
+
+.status-Execução,
+.status-Em\ Execução {
+  background: var(--sky-blue);
+  color: var(--white);
+}
+
+/* Botão detalhes */
 .detalhes-btn {
-  padding: 10px 16px;
   background: linear-gradient(135deg, var(--sky-blue), var(--marine-blue));
   color: var(--white);
-  border-radius: var(--radius);
   text-decoration: none;
+  padding: 12px 18px;
+  border-radius: var(--radius);
   font-weight: bold;
-  transition: var(--transition);
+  height: fit-content;
   box-shadow: var(--shadow-soft);
+  transition: var(--transition);
 }
 
 .detalhes-btn:hover {
+  transform: translateY(-4px);
   background: var(--marine-blue);
-  transform: translateY(-6px);
   box-shadow: var(--shadow-strong);
 }
 
-/* RESPONSIVO */
-@media (max-width: 700px) {
+/* MOBILE */
+@media (max-width: 720px) {
 
-  header h1 {
-    font-size: 22px;
+  header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
   }
 
   .dashboard-header {
     flex-direction: column;
     gap: 16px;
-    text-align: center;
   }
 
   .chamado-card {
     flex-direction: column;
     gap: 14px;
+  }
+
+  .detalhes-btn {
+    width: 100%;
+    text-align: center;
   }
 }

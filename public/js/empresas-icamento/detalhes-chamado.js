@@ -14,12 +14,12 @@ function get_cookie(cname) {
     return "";
 }
 
-let id_empresa = get_cookie("idEmpresa");
-let id_usuario = get_cookie("idUsuario");
+// let id_empresa = get_cookie("idEmpresa");
+// let id_usuario = get_cookie("idUsuario");
 
-if (!id_empresa && !id_usuario) {
-    window.location.href = `/samsung/`;
-}
+// if (!id_empresa && !id_usuario) {
+//     window.location.href = `/samsung/`;
+// }
 
 // ===============================
 // DETALHES DO CHAMADO - FRONTEND

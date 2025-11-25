@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const XLSX = require("xlsx");
 const Empresas = require('../models/Empresas');
 const Usuarios_Autorizados = require('../models/Usuarios_Autorizados');
+const Administradores = require('../models/Administradores');
 const { criarClienteAsaas } = require('./api/asaas');
 const { client, sendMessage } = require('./api/whatsapp-web');
 client.on('ready', () => {
@@ -213,53 +214,82 @@ app.post('/cadastrar-usuarios', async (req, res) => {
   }
 });
 
-// Login
+// ===================================================
+// LOGIN (EMPRESAS + USUÁRIOS AUTORIZADOS)
+// ===================================================
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
-
-    // Tenta autenticar como EMPRESA
-    let entidade = await Empresas.findOne({ where: { email } });
-
-    if (entidade) {
-      const passwordMatch = await bcrypt.compare(senha, entidade.senha);
-      if (!passwordMatch) {
-        return res.status(401).json({ message: "Senha incorreta" });
-      }
-
-      res.cookie('tipo', 'empresa');
-      res.cookie('tipo2', 'cliente');
-      res.cookie('idEmpresa', entidade.id);
-      res.cookie('nomeEmpresa', entidade.nome);
-      const token = Math.random().toString(16).substring(2);
-
-      return res.json({ message: "Login empresa OK", token, tipo: "empresa", nome: entidade.nome });
+    if (!email || !senha) {
+      return res.status(400).json({ message: "Email e senha obrigatórios." });
     }
 
-    // Tenta autenticar como USUÁRIO AUTORIZADO
-    entidade = await Usuarios_Autorizados.findOne({ where: { email } });
+    // ===================================================
+    // 1. TENTA LOGAR COMO ADMINISTRADOR
+    // ===================================================
+    const admin = await Administradores.findOne({ where: { email } });
 
-    if (entidade) {
-      const passwordMatch = await bcrypt.compare(senha, entidade.senha);
-      if (!passwordMatch) {
-        return res.status(401).json({ message: "Senha incorreta" });
-      }
+    if (admin) {
+      const senhaOk = await bcrypt.compare(senha, admin.senha);
+      if (!senhaOk) return res.status(401).json({ message: "Senha incorreta" });
 
-      res.cookie('tipo', 'usuario');
-      res.cookie('tipo2', 'cliente')
-      res.cookie('idUsuario', entidade.id);
-      res.cookie('nomeUsuario', entidade.nome);
-      res.cookie('empresaId', entidade.empresa_id);
-      const token = Math.random().toString(16).substring(2);
+      res.cookie("authTipo", "admin");
+      res.cookie("authAdminId", admin.id);
+      res.cookie("authNome", admin.nome);
 
-      return res.json({ message: "Login usuário OK", token, tipo: "usuario", nome: entidade.nome });
+      return res.json({
+        success: true,
+        tipo: "admin",
+        nome: admin.nome,
+        message: "Login administrador OK"
+      });
     }
 
-    return res.status(401).json({ message: "Usuário não encontrado" });
+    // ===================================================
+    // 2. EMPRESA PROPRIETÁRIA
+    // ===================================================
+    let empresa = await Empresas.findOne({ where: { email } });
+    if (empresa) {
+      const senhaOk = await bcrypt.compare(senha, empresa.senha);
+      if (!senhaOk) return res.status(401).json({ message: "Senha incorreta" });
 
-  } catch (error) {
-    console.error("Erro ao fazer login:", error);
-    res.status(500).json({ message: "Erro ao fazer login" });
+      res.cookie("authTipo", "empresa");
+      res.cookie("authEmpresaId", empresa.id);
+      res.cookie("authNome", empresa.nome);
+
+      return res.json({
+        success: true,
+        tipo: "empresa",
+        nome: empresa.nome
+      });
+    }
+
+    // ===================================================
+    // 3. USUÁRIO AUTORIZADO
+    // ===================================================
+    const user = await Usuarios_Autorizados.findOne({ where: { email } });
+
+    if (user) {
+      const senhaOk = await bcrypt.compare(senha, user.senha);
+      if (!senhaOk) return res.status(401).json({ message: "Senha incorreta" });
+
+      res.cookie("authTipo", "autorizado");
+      res.cookie("authUsuarioAutorizadoId", user.id);
+      res.cookie("authEmpresaId", user.empresa_id);
+      res.cookie("authNome", user.nome);
+
+      return res.json({
+        success: true,
+        tipo: "autorizado",
+        nome: user.nome
+      });
+    }
+
+    return res.status(404).json({ message: "Usuário não encontrado" });
+
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Erro interno" });
   }
 });
 
@@ -599,7 +629,7 @@ app.post('/login-empresas-icamento', async (req, res) => {
       return res.status(401).json({ message: "Senha incorreta!" });
     }
 
-    res.cookie("empresaIcamentoId", empresa.id);
+    res.cookie("id_empresa", empresa.id);
     res.cookie("nomeEmpresa", empresa.nome);
     
     res.json({ message: "Login feito com Sucesso!" });

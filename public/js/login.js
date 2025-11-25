@@ -1,44 +1,66 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const email = document.getElementById('email');
-  const senha = document.querySelector('#senha');
-  
-  email.addEventListener('input', () => {
-    // Remove espaços e força letras minúsculas
-    email.value = email.value.trim().toLowerCase();
-    
-    // Validação simples de e-mail com regex
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
-    
-    if (!emailValido && email.value !== "") {
-      email.style.border = 'red';
+  const emailInput = document.getElementById('email');
+
+  // Validação dinâmica de e-mail
+  emailInput.addEventListener('input', () => {
+    emailInput.value = emailInput.value.trim().toLowerCase();
+
+    const valido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+
+    if (!valido && emailInput.value !== "") {
+      emailInput.classList.add("input-erro");
     } else {
-      email.style.border = 'black';
+      emailInput.classList.remove("input-erro");
     }
   });
 });
-document.querySelector('.login-form').addEventListener('submit', async (e) => {
+
+// ============================
+// Login
+// ============================
+document.addEventListener('DOMContentLoaded', () => {
+  const emailInput = document.getElementById('email');
+
+  emailInput.addEventListener('input', () => {
+    emailInput.value = emailInput.value.trim().toLowerCase();
+
+    const valido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+    emailInput.classList.toggle("input-erro", !valido && emailInput.value !== "");
+  });
+
+  const form = document.querySelector('.login-form');
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = document.querySelector('#email').value.trim();
+    const email = emailInput.value.trim().toLowerCase();
     const senha = document.querySelector('#senha').value.trim();
+
+    if (!email || !senha) {
+      alert("Preencha e-mail e senha.");
+      return;
+    }
 
     try {
       const response = await fetch('/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha })
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Redireciona para o painel após login bem-sucedido
-        window.location.href = "/samsung/dashboard";
-      } else {
-        alert(data.message || 'Erro ao fazer login.');
+      if (!response.ok) {
+        alert(data.message || "Erro ao fazer login.");
+        return;
       }
+
+      window.location.href = "/samsung/dashboard";
+
     } catch (err) {
-      console.error('Erro na requisição:', err);
-      alert('Erro ao conectar com o servidor.');
+      console.error("Erro ao conectar:", err);
+      alert("Falha na conexão com o servidor.");
     }
   });
+});

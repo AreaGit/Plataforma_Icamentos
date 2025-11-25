@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../../css/empresas-icamento/detalhes-chamado.css">
 </head>
 <body>
+
   <main class="container">
     <h1>Detalhes do Chamado</h1>
 
@@ -16,59 +17,56 @@
       <div class="campo"><h3>Endereço:</h3> <span id="endereco"></span></div>
       <div class="campo"><h3>Tipo de Içamento:</h3> <span id="tipo_icamento"></span></div>
       <div class="campo"><h3>Data Agendada:</h3> <span id="data_agenda"></span></div>
-      <div class="campo">
-        <h3>Status:</h3>
-        <span id="status"></span>
-        <button id="btnAvancarStatus" class="botao-download" style="display: none;">Avançar Status</button>
-        <button id="btnRemarcarData" class="botao-download" style="display: none;">Remarcar Data</button>
-      </div>
+      <div class="campo"><h3>Status:</h3> <span id="status"></span> <button id="btnAvancarStatus">Avançar Status</button></div>
       <div class="campo"><h3>Observações:</h3> <span id="observacoes"></span></div>
       <div class="campo"><h3>VT:</h3> <span id="vt"></span></div>
       <div class="campo"><h3>ART:</h3> <span id="art"></span></div>
     </section>
 
+    <!-- DOCUMENTOS PARA AGENDADO -->
     <section id="documentos-adicionais" style="display: none; margin-top: 30px;">
       <h2>Enviar Documentos do Chamado</h2>
-
       <form id="form-documentos">
         <div class="campo-form">
           <label for="arquivos_documentos">Selecione os arquivos:</label>
           <input type="file" id="arquivos_documentos" name="arquivos_documentos" multiple accept="image/*,application/pdf">
         </div>
-
         <button type="button" id="btnEnviarDocumentos" class="botao-download">Enviar Documentos</button>
       </form>
     </section>
 
+    <!-- ANEXOS -->
     <section class="anexos">
       <h2>Anexos</h2>
       <div class="grid-anexos" id="anexos"></div>
     </section>
-    
+
+    <!-- FINALIZAÇÃO -->
     <section id="form-finalizacao" style="display: none; margin-top: 30px;">
       <h2>Finalizar Chamado</h2>
-      
       <form id="form-finalizar">
 
         <div class="campo-form">
-          <label for="cliente_presente">Cliente estava no local ?</label>
-          <select name="cliente_presente" id="cliente_presente">
+          <label for="cliente_presente">Cliente estava no local?</label>
+          <select id="cliente_presente">
             <option value="">Selecionar</option>
             <option value="sim">Sim</option>
             <option value="nao">Não</option>
           </select>
         </div>
+
         <div class="campo-form">
-          <label for="produto_ok">Tudo certo com o produto ?</label>
-          <select name="produto_ok" id="produto_ok">
+          <label for="produto_ok">Tudo certo com o produto?</label>
+          <select id="produto_ok">
             <option value="">Selecionar</option>
             <option value="sim">Sim</option>
             <option value="nao">Não</option>
           </select>
         </div>
+
         <div class="campo-form">
-          <label for="tecnico_presente">Técnico estava no local ?</label>
-          <select name="tecnico_presente" id="tecnico_presente">
+          <label for="tecnico_presente">Técnico estava no local?</label>
+          <select id="tecnico_presente">
             <option value="">Selecionar</option>
             <option value="sim">Sim</option>
             <option value="nao">Não</option>
@@ -77,49 +75,53 @@
 
         <div class="campo-form">
           <label for="horario_finalizacao">Horário de Finalização:</label>
-          <input type="time" id="horario_finalizacao" name="horario_finalizacao" required>
+          <input type="time" id="horario_finalizacao" required>
         </div>
-        
+
         <div class="campo-form">
           <label for="fotos_finalizacao">Fotos do Local:</label>
-          <input type="file" id="fotos_finalizacao" name="fotos_finalizacao" multiple accept="image/*">
+          <input type="file" id="fotos_finalizacao" multiple accept="image/*">
         </div>
-        
+
         <div class="campo-form">
           <label for="obs_finalizacao">Observações:</label>
-          <textarea id="obs_finalizacao" name="obs_finalizacao" rows="4"></textarea>
+          <textarea id="obs_finalizacao" rows="4"></textarea>
         </div>
-        
-        <button type="button" class="botao-download" id="btnSalvar">Salvar Finalização</button>
-      </form>
 
+        <button type="button" id="btnSalvar" class="botao-download">Salvar Finalização</button>
+      </form>
+    </section>
+
+    <!-- REMARCAÇÃO (APENAS EMPRESA DE IÇAMENTO) -->
+    <section id="propor-data" style="display:none; margin-top: 30px;">
+      <h2>Propor Nova Data de Içamento</h2>
+
+      <div class="campo-form">
+        <label>Nova Data:</label>
+        <input type="date" id="data_input">
+      </div>
+
+      <div class="campo-form">
+        <label>Novo Horário:</label>
+        <select id="hora_input">
+          <option value="">Selecionar</option>
+          <option>09:00</option>
+          <option>11:00</option>
+          <option>13:00</option>
+          <option>15:00</option>
+        </select>
+      </div>
+
+      <button id="btnProporNovaData" class="botao-download">Enviar Proposta</button>
     </section>
 
     <a href="/samsung/empresas-icamento/painel" class="botao-voltar">Voltar</a>
   </main>
 
-<div class="campo" id="nova-data-proposta" style="display:none;">
-  <h3>Nova data proposta</h3>
-  <p><span id="data-proposta"></span></p>
-  <button id="btnAceitarProposta">Aceitar nova data</button>
-  <button id="btnProporOutraData">Propor outra data</button>
-</div>
+  <div class="loading-screen">
+    <div class="spinner"></div>
+  </div>
 
-<div class="campo" id="propor-data" style="display: none;">
-  <h3>Propor nova data e horário</h3>
-  <input type="date" id="data_input" />
-  <select id="hora_input">
-    <option value="">Selecione o horário</option>
-    <option value="09:00">09:00</option>
-    <option value="11:00">11:00</option>
-    <option value="13:00">13:00</option>
-    <option value="15:00">15:00</option>
-  </select>
-  <button id="btnProporNovaData">Propor nova data</button>
-</div>
-<div class="loading-screen">
-  <div class="spinner"></div>
-</div>
   <script src="../../js/empresas-icamento/detalhes-chamado.js"></script>
 </body>
 </html>

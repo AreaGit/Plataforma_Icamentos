@@ -11,7 +11,7 @@ function getCookie(cname) {
   return "";
 }
 
-const idEmpresa = getCookie("idEmpresa");
+const idEmpresa = getCookie("authEmpresaId");
 const form = document.getElementById("formPerfil");
 const msg = document.getElementById("mensagem");
 
