@@ -1,3 +1,43 @@
+function get_cookie(cname) {
+    let name = cname + "="
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while(c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if(c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length)
+        }
+    }
+    return "";
+}
+
+function clearAllCookies() {
+    // Pega todos os cookies como uma string única
+    const cookies = document.cookie.split(';');
+
+    // Itera sobre cada cookie
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        // Remove espaços em branco do início da string do cookie
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        
+        // Define o cookie com uma data de expiração no passado
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    }
+}
+
+let id_empresa = get_cookie("id_empresa");
+// let id_usuario = get_cookie("idUsuario");
+
+if (!id_empresa) {
+  clearAllCookies();
+  window.location.href = `/samsung/empresas-icamento/login`;
+}
+
 async function carregarChamados(filtros = {}) {
   const params = new URLSearchParams(filtros).toString();
   const res = await fetch(`/empresa-icamentos/chamados?${params}`);

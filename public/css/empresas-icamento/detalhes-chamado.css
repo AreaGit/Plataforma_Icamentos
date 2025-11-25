@@ -133,6 +133,17 @@ h1 {
   color: var(--cloud);
 }
 
+#btnAvancarStatus {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  border: none;
+  padding: 16px 8px 16px 8px;
+  background-color: #1428A0;
+  border-radius: 18px;
+  cursor: pointer;
+}
+
 /* ----------------------------------------------------
                         STATUS
 ------------------------------------------------------- */
