@@ -5,11 +5,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const moment = require('moment');
+const { Op } = require('sequelize');
 require('dotenv').config();
 
 const Chamados = require('../models/Chamados');
 const Empresas = require('../models/Empresas');
 const Empresas_Icamento = require('../models/Empresas_Icamento.js');
+const EmpresasIcamento = require('../models/Empresas_Icamento.js');
 const Administradores = require('../models/Administradores.js');
 
 const Precos_Icamentos_Televisores = require('../models/Precos_Icamentos_Televisores.js');
@@ -363,76 +365,157 @@ app.get('/chamado/:id', async (req, res) => {
   }
 });
 
-// Propor nova data
-app.put('/chamado/:id/propor-data', async (req, res) => {
-  const { novaDataHora, userId, tipo } = req.body;
-  const { id } = req.params;
+  // --------------------------------------------------
+  // Propor nova data
+  // body: { novaDataHora, userId, tipo } 
+  // tipo: 'cliente' | 'autorizado' | 'icamento' (aceita variações 'empresa' para compatibilidade)
+  // --------------------------------------------------
 
-  if (!novaDataHora) {
-    return res.status(400).json({ error: 'Nova data/hora é obrigatória' });
-  }
+app.put("/chamado/:id/propor-data", async (req, res) => {
+    try {
+        const chamadoId = req.params.id;
+        const { novaDataHora, userId, tipo } = req.body;
 
-  try {
-    const chamado = await Chamados.findByPk(id);
+        if (!novaDataHora || !userId || !tipo) {
+            return res.status(400).json({ error: "Dados incompletos." });
+        }
 
-    if (!chamado) {
-      return res.status(404).json({ error: 'Chamado não encontrado' });
+        const chamado = await Chamados.findByPk(chamadoId);
+        if (!chamado) return res.status(404).json({ error: "Chamado não encontrado." });
+
+        // Só permite proposta quando está em “Aguardando”
+        if (String(chamado.status).toLowerCase() !== "aguardando") {
+            return res.status(400).json({ error: "Só é possível propor nova data quando o chamado está em Aguardando." });
+        }
+
+        // Validação de data
+        const novaData = new Date(novaDataHora);
+        if (isNaN(novaData.getTime())) {
+            return res.status(400).json({ error: "Data inválida." });
+        }
+
+        const agora = new Date();
+        if (novaData <= agora) {
+            return res.status(400).json({ error: "A nova data deve ser futura." });
+        }
+
+        // Monta data/hora atual agendada
+        const dataAtualAgenda = new Date(`${chamado.data_agenda}T${chamado.horario_agenda}`);
+
+        const horasDiff = (dataAtualAgenda - agora) / (1000 * 60 * 60);
+        if (horasDiff <= 24) {
+            return res.status(400).json({ error: "Remarcação só é permitida com mais de 24h de antecedência." });
+        }
+
+        // Normaliza tipo
+        const tipoNorm = String(tipo).toLowerCase();
+
+        // // Valida permissão
+        // const permitido = await validarPermissao(chamado, userId, tipoNorm);
+        // if (!permitido.ok) {
+        //     return res.status(403).json({ error: permitido.msg });
+        // }
+
+        // Grava proposta
+        chamado.nova_data_proposta = novaData;
+        chamado.proponenteId = userId;
+        chamado.tipoProponente = tipoNorm;
+        // chamado.status = "Aguardando Confirmação";
+
+        await chamado.save();
+
+        return res.json({
+            success: true,
+            message: "Proposta enviada com sucesso. Aguardando resposta da outra parte.",
+            proposta: chamado.nova_data_proposta
+        });
+
+    } catch (err) {
+        console.error("Erro propor nova data:", err);
+        res.status(500).json({ error: "Erro interno." });
     }
-
-    const STATUS_FECHADOS = ["Agendado", "Em Execução", "Finalizado", "Cancelado", "No-Show"];
-
-    if (STATUS_FECHADOS.includes(chamado.status)) {
-      return res.status(403).json({ error: 'Chamado não pode mais ser remarcado' });
-    }
-
-    chamado.nova_data_proposta = new Date(novaDataHora);
-    chamado.proponenteId = Number(userId) || null;
-    chamado.tipoProponente = tipo;
-    await chamado.save();
-
-    return res.status(200).json({ message: 'Nova data proposta com sucesso' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Erro interno' });
-  }
 });
+  // --------------------------------------------------
+  // Responder proposta (aceitar | recusar)
+  // body: { acao: 'aceitar'|'recusar', userId, tipo }
+  // --------------------------------------------------
 
-// Aceitar proposta de data
-app.put('/chamado/:id/aceitar-proposta', async (req, res) => {
-  const { id } = req.params;
-  const { userId, tipo } = req.body;
+app.put("/chamado/:id/responder-proposta", async (req, res) => {
+    try {
+        const chamadoId = req.params.id;
+        const { acao, userId, tipo } = req.body;
 
-  try {
-    const chamado = await Chamados.findByPk(id);
+        console.log(req.body)
 
-    if (!chamado) {
-      return res.status(404).json({ error: 'Chamado não encontrado' });
+        if (!acao || !userId || !tipo) {
+            return res.status(400).json({ error: "Dados incompletos." });
+        }
+
+        const chamado = await Chamados.findByPk(chamadoId);
+        if (!chamado) return res.status(404).json({ error: "Chamado não encontrado." });
+
+        // if (String(chamado.status).toLowerCase() !== "aguardando confirmação") {
+        //     return res.status(400).json({ error: "Não há proposta pendente." });
+        // }
+
+        if (!chamado.nova_data_proposta) {
+            return res.status(400).json({ error: "Nenhuma proposta existe." });
+        }
+
+        const tipoNorm = String(tipo).toLowerCase();
+
+        // Proponente não pode responder à própria proposta
+        if (Number(chamado.proponenteId) === Number(userId) && chamado.tipoProponente === tipoNorm) {
+            return res.status(403).json({ error: "Você não pode responder à sua própria proposta." });
+        }
+
+        // Valida permissão
+        // const permitido = await validarPermissao(chamado, userId, tipoNorm);
+        // if (!permitido.ok) {
+        //     return res.status(403).json({ error: permitido.msg });
+        // }
+
+        const acaoNorm = acao.toLowerCase();
+
+        if (acaoNorm === "aceitar") {
+
+            const nova = new Date(chamado.nova_data_proposta);
+            const iso = nova.toISOString();
+            const [data, hora] = iso.split("T");
+
+            chamado.data_agenda = data;
+            chamado.horario_agenda = hora.slice(0, 5);
+
+            chamado.nova_data_proposta = null;
+            chamado.proponenteId = null;
+            chamado.tipoProponente = null;
+
+            chamado.status = "Aguardando";
+
+            await chamado.save();
+
+            return res.json({ success: true, message: "Proposta aceita. Data atualizada." });
+
+        } else if (acaoNorm === "recusar") {
+
+            chamado.nova_data_proposta = null;
+            chamado.proponenteId = null;
+            chamado.tipoProponente = null;
+
+            chamado.status = "Aguardando";
+
+            await chamado.save();
+
+            return res.json({ success: true, message: "Proposta recusada." });
+
+        } else {
+            return res.status(400).json({ error: "Ação inválida." });
+        }
+
+    } catch (err) {
+        console.error("Erro responder proposta:", err);
+        res.status(500).json({ error: "Erro interno." });
     }
-
-    if (!chamado.nova_data_proposta) {
-      return res.status(400).json({ error: 'Não há proposta para aceitar' });
-    }
-
-    const userIdNum = Number(userId);
-
-    if (!Number.isNaN(userIdNum) &&
-        chamado.proponenteId === userIdNum &&
-        chamado.tipoProponente === tipo) {
-      return res.status(403).json({ error: 'Você não pode aceitar sua própria proposta' });
-    }
-
-    const novaData = new Date(chamado.nova_data_proposta);
-    chamado.data_agenda = novaData.toISOString().split('T')[0];
-    chamado.horario_agenda = novaData.toISOString().split('T')[1].slice(0, 5);
-    chamado.nova_data_proposta = null;
-
-    await chamado.save();
-
-    return res.status(200).json({ message: 'Nova data aceita e atualizada' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Erro interno' });
-  }
 });
 
 // Aprovar chamado

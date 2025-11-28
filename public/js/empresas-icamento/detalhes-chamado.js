@@ -241,6 +241,145 @@ async function carregarDetalhes() {
     });
   }
 
+  // ==========================================
+  // SE STATUS = AGUARDANDO -> PROPOR NOVA DATA
+  // ==========================================
+  if(chamado.status === "Aguardando") {
+    const secaoProporData = document.getElementById("propor-data");
+    const btnProporNovaData = document.getElementById("btnProporNovaData");
+    const data_input = document.getElementById("data_input");
+    const hora_input = document.getElementById("hora_input");
+
+    const secaoNovaDataProposta = document.getElementById("nova-data-proposta");
+    const data_proposta = document.getElementById("data-proposta");
+    const btnAceitarProposta = document.getElementById("btnAceitarProposta");
+    const btnProporOutraData = document.getElementById("btnProporOutraData");
+
+      // Função para formatar a data no padrão BR
+      const formatarDataBR = (dataISO) => {
+        const data = new Date(dataISO);
+        return data.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      };
+
+    if(chamado.status == "Aguardando" && (!chamado.nova_data_proposta)) {
+      secaoProporData.style.display = "block";
+    } else {
+      secaoNovaDataProposta.style.display = "block";
+      if(chamado.tipoProponente == "empresa") {
+        data_proposta.textContent = formatarDataBR(chamado.nova_data_proposta);
+        btnAceitarProposta.style.display = 'none';
+        btnProporOutraData.style.display = 'none';
+      } else {
+        data_proposta.textContent = formatarDataBR(chamado.nova_data_proposta);
+        btnAceitarProposta.style.display = 'block';
+        btnProporOutraData.style.display = 'block';
+      }
+    }
+
+    btnProporOutraData.addEventListener("click", () => {
+      secaoProporData.style.display = "block";
+      secaoNovaDataProposta.style.display = "none";
+    });
+
+    // ==============
+    // ENVIA PROPOSTA
+    // ==============
+
+    btnProporNovaData.addEventListener("click", async () => {
+      const dataProposta = data_input.value;
+      const horarioProposta = hora_input.value;
+      
+      if (!dataProposta || !horarioProposta) {
+        alert("Preencha a data e horário antes de enviar.");
+        return;
+      }
+      
+      // Monta a string no formato esperado pelo backend
+      const novaDataHora = `${dataProposta}T${horarioProposta}:00`;
+      
+      const userId = id_empresa; // PEGA DO COOKIE
+      const tipo = "empresa"; // A empresa de içamento sempre é 'empresa'
+      
+      btnProporNovaData.textContent = "Enviando...";
+      btnProporNovaData.disabled = true;
+      
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const chamadoId = urlParams.get("id");
+        
+        const res = await fetch(`/chamado/${chamadoId}/propor-data`, {
+          method: "PUT",
+          headers: { 
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            novaDataHora,
+            userId,
+            tipo
+          })
+        });
+        
+        const result = await res.json();
+        console.log("Resultado proposta:", result);
+        
+        if (!res.ok) {
+          alert(result.error || "Erro ao enviar proposta.");
+          btnProporNovaData.textContent = "Enviar Proposta";
+          btnProporNovaData.disabled = false;
+          return;
+        }
+        
+        alert("Proposta enviada com sucesso! Agora aguarde a resposta da outra parte.");
+        window.location.reload();
+        
+      } catch (err) {
+        console.error("Erro ao enviar proposta:", err);
+        alert("Erro ao enviar proposta.");
+        btnProporNovaData.textContent = "Enviar Proposta";
+        btnProporNovaData.disabled = false;
+      }
+    });
+
+    // ===============
+    // ACEITA PROPOSTA
+    // ===============
+
+    btnAceitarProposta.addEventListener("click", async () => {
+      const userId = id_empresa; // PEGA DO COOKIE
+      const tipo = "empresa"; // A empresa de içamento sempre é 'empresa'
+      try {
+        const resp = await fetch(`/chamado/${chamado.id}/responder-proposta`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            tipo: tipo,
+            acao: "aceitar"
+          })
+        });
+        
+        const data = await resp.json();
+        
+        if (resp.ok) {
+          alert("Proposta de nova data aceita!");
+          setTimeout(() => location.reload(), 800);
+        } else {
+          alert("Erro ao aceitar proposta");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao aceitar proposta");
+      }
+    });
+
+  }
+
   // ===========================
   // SE STATUS = AGENDADO → UPLOAD DE DOCUMENTOS
   // ===========================

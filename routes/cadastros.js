@@ -631,6 +631,7 @@ app.post('/login-empresas-icamento', async (req, res) => {
 
     res.cookie("id_empresa", empresa.id);
     res.cookie("nomeEmpresa", empresa.nome);
+    res.cookie("tipo", "icamento");
     
     res.json({ message: "Login feito com Sucesso!" });
   } catch (error) {

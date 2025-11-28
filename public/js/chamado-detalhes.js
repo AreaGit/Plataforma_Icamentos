@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnProporNovaData = document.getElementById("btnProporNovaData");
 
   // Todos os papéis (admin, empresa, autorizado) podem propor nova data
-  const tipoUsuario = authTipo; // "admin" | "empresa" | "autorizado"
+  const tipoUsuario = "cliente"; // "admin" | "empresa" | "autorizado"
   const userId = currentUserId;
 
   // Somente se o chamado estiver em status que faça sentido negociar data
@@ -285,15 +285,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         String(chamado.proponenteId) !== String(userId) ||
         String(chamado.tipoProponente) !== String(tipoUsuario);
 
-      if (outroUsuario && btnAceitarProposta) {
-        btnAceitarProposta.style.display = "inline-block";
+        if(chamado.tipoProponente == "cliente") {
+          btnAceitarProposta.style.display = "none";
+        } else {
+          btnAceitarProposta.style.display = "inline-block";
+        }
+
+      if (outroUsuario && btnAceitarProposta) {  
         btnAceitarProposta.onclick = async () => {
           try {
-            const resp = await fetch(`/chamado/${chamado.id}/aceitar-proposta`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ userId, tipo: tipoUsuario })
-            });
+              const resp = await fetch(`/chamado/${chamado.id}/responder-proposta`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId,
+                  tipo: "cliente",
+                  acao: "aceitar"
+                })
+              });
             const data = await resp.json();
 
             if (resp.ok) {
