@@ -11,7 +11,17 @@ function getCookie(cname) {
   return "";
 }
 
-const idEmpresa = getCookie("authEmpresaId");
+let idEmpresa;
+let tipo = getCookie("authTipo");
+
+if(tipo == "admin") {
+  idEmpresa = getCookie("authAdminId");
+} else if(tipo == "autorizado") {
+  idEmpresa = getCookie("authUsuarioAutorizadoId")
+} else if(tipo == "empresa") {
+  idEmpresa = getCookie("authEmpresaId")
+}
+
 const form = document.getElementById("formPerfil");
 const msg = document.getElementById("mensagem");
 
@@ -61,6 +71,7 @@ form.addEventListener("submit", async (e) => {
     msg.textContent = "Erro na atualização.";
     msg.style.color = "red";
   }
+  window.location.reload();
 });
 
 document.getElementById("voltar-btn").addEventListener("click", () => {

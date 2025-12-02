@@ -17,10 +17,12 @@ const form = document.getElementById("form-resetar");
         return;
       }
 
+      const tipoUser = tipo.split(' ')[0];
+
       const response = await fetch("/resetar-senha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, tipo, senha })
+        body: JSON.stringify({ token, tipo, senha, tipoUser })
       });
 
       const data = await response.json();

@@ -24,6 +24,12 @@ const Administradores = db.define('administradores', {
         type: Sequelize.STRING(255),
         allowNull: false
     },
+    reset_token: {
+        type: Sequelize.STRING(255),
+    },
+    reset_token_expiration: {
+        type: Sequelize.DATE,
+    },
     ativo: {
         type: Sequelize.BOOLEAN,
         defaultValue: true

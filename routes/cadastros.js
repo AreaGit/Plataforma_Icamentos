@@ -311,6 +311,11 @@ app.post("/esqueci-senha", async (req, res) => {
       tipo = "usuario";
     }
 
+    if(!user) {
+      user = await Administradores.findOne({ where: { email } });
+      tipo = "admin"
+    }
+
     if (!user) {
       return res.status(404).json({ message: "E-mail não encontrado" });
     }
@@ -343,9 +348,20 @@ app.post("/esqueci-senha", async (req, res) => {
 
 app.post("/resetar-senha", async (req, res) => {
   try {
-    const { token, senha, tipo } = req.body;
+    const { token, senha, tipo, tipoUser } = req.body;
+    let tabela;
 
-    const tabela = tipo === "empresa" ? Empresas : Usuarios_Autorizados;
+    if(tipoUser == "empresa") {
+      tabela = Empresas;
+    } else if(tipoUser == "usuario") {
+      tabela = Usuarios_Autorizados;
+    } else if(tipoUser == "admin") {
+      tabela = Administradores;
+    };
+
+    // const tabela = tipo === "empresa" ? Empresas : Usuarios_Autorizados;
+
+    console.log(tabela)
 
     const user = await tabela.findOne({
       where: {

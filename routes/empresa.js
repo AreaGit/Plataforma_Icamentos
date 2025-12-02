@@ -1,12 +1,24 @@
 const bcrypt = require("bcrypt");
 const Empresas = require("../models/Empresas");
+const Administradores = require("../models/Administradores");
+const Autorizados = require("../models/Usuarios_Autorizados")
 const express = require("express");
 const app = express();
 
 // GET perfil da empresa
 app.get("/empresas/:id", async (req, res) => {
   try {
-    const empresa = await Empresas.findByPk(req.params.id);
+    const tipo = req.cookies.authTipo;
+    let empresa;
+    
+    if(tipo == "admin") {
+      empresa = await Administradores.findByPk(req.params.id);
+    } else if(tipo == "autorizado") {
+      empresa = await Autorizados.findByPk(req.params.id);
+    } else if(tipo == "empresa") {
+      empresa = await Empresas.findByPk(req.params.id);
+    }
+
     if (!empresa) return res.status(404).json({ error: "Empresa não encontrada" });
     res.json(empresa);
   } catch (error) {
@@ -19,7 +31,17 @@ app.get("/empresas/:id", async (req, res) => {
 app.put("/empresas/:id", async (req, res) => {
   try {
     const { nome, telefone, email, senha } = req.body;
-    const empresa = await Empresas.findByPk(req.params.id);
+    const tipo = req.cookies.authTipo;
+    let empresa;
+    
+    if(tipo == "admin") {
+      empresa = await Administradores.findByPk(req.params.id);
+    } else if(tipo == "autorizado") {
+      empresa = await Autorizados.findByPk(req.params.id);
+    } else {
+      empresa = await Empresas.findByPk(req.params.id);
+    }
+    
     if (!empresa) return res.status(404).json({ error: "Empresa não encontrada" });
 
     empresa.nome = nome;
