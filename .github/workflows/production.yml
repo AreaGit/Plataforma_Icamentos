@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout código
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       - name: Instalar Node
         uses: actions/setup-node@v3
