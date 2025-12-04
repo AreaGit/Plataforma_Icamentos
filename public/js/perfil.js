@@ -1,3 +1,5 @@
+// =========== FUNÇÃO PARA PEGAR COOKIES =================
+
 function getCookie(cname) {
   const name = cname + "=";
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -10,6 +12,8 @@ function getCookie(cname) {
   }
   return "";
 }
+
+// =====================================================
 
 const idEmpresa = getCookie("authEmpresaId");
 const form = document.getElementById("formPerfil");
