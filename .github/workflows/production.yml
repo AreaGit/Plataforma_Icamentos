@@ -21,7 +21,7 @@ jobs:
       - name: Instalar dependências
         run: npm install --production
 
-      - name: Enviar arquivos para o servidor
+      - name: Enviar arquivos para o servidor (production)
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SERVER_HOST }}
