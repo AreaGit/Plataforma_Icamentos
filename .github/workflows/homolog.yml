@@ -3,7 +3,7 @@ name: Homolog
 on:
   push:
     branches:
-      - homolog
+      - develop
 
 jobs:
   deploy:
