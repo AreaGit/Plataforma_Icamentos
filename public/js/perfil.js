@@ -1,3 +1,5 @@
+// =========== FUNÇÃO PARA PEGAR COOKIES =================
+
 function getCookie(cname) {
   const name = cname + "=";
   const decodedCookie = decodeURIComponent(document.cookie);
