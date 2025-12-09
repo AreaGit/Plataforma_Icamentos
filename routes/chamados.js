@@ -255,7 +255,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     const novoChamado = await Chamados.create({
       empresa_id,
       criador_id,
-      aprovador_id: empresaProprietaria.id,
+      // aprovador_id: empresaProprietaria.id,
       aprovacao_status: "Pendente",
       status: "Aguardando Aprovação",
 
@@ -291,7 +291,7 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     await enviarNotificacaoWhatsapp(
       empresaProprietaria.telefone,
       `Olá, ${empresaProprietaria.nome}
-Há um novo chamado aguardando sua aprovação:
+Há um novo chamado de içamento aguardando sua aprovação:
 
 📌 Chamado: ${novoChamado.id}
 ➡ Acesse: ${link}
@@ -533,6 +533,9 @@ app.put("/chamado/:id/aprovar", async (req, res) => {
       return res.status(403).json({ error: "Somente administradores podem aprovar chamados." });
     }
 
+    //VARIÁVEIS PARA AS INFORMAÇÕES DO ADMIN
+    const nomeAdmin = admin.nome;
+
     if (chamado.aprovacao_status !== "Pendente") {
       return res.status(400).json({ error: "Chamado já foi analisado." });
     }
@@ -541,6 +544,7 @@ app.put("/chamado/:id/aprovar", async (req, res) => {
     chamado.aprovacao_status = "Aprovado";
     chamado.aprovacao_data = new Date();
     chamado.status = "Aguardando"; // Empresa de icamento agora deve assumir
+    chamado.aprovador_id = admin.id;
 
     await chamado.save();
 
@@ -555,7 +559,7 @@ app.put("/chamado/:id/aprovar", async (req, res) => {
     const assistencia = await Empresas.findByPk(chamado.empresa_id);
     if (assistencia && assistencia.telefone) {
       
-      const msgAssistencia = `Olá! ${assistencia.nome}\nTudo certo?\nSeu chamado de Içamento ${chamado.id} foi aberto com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+      const msgAssistencia = `Olá! ${assistencia.nome}\nTudo certo?\nSeu chamado de Içamento ${chamado.id} foi *APROVADO* por ${nomeAdmin} com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. ✅\n\n📌 Você poderá acompanhar os próximos passos pelo portal: ${link}\nAlém disso, você também receberá as atualizações por aqui no WhatsApp.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
 
       try {
         await enviarNotificacaoWhatsapp(assistencia.telefone, msgAssistencia);
@@ -612,16 +616,34 @@ app.put("/chamado/:id/rejeitar", async (req, res) => {
       return res.status(400).json({ error: "aprovadorId inválido" });
     }
 
-    if (chamado.aprovador_id !== aprovadorIdNum) {
-      return res.status(403).json({ error: "Você não tem permissão para rejeitar este chamado" });
+    // VERIFICA SE É ADMINISTRADOR
+    const admin = await Administradores.findByPk(aprovadorId);
+    if (!admin) {
+      return res.status(403).json({ error: "Somente administradores podem rejeitar chamados." });
     }
+
+    const nomeAdmin = admin.nome;
 
     chamado.aprovacao_status = "Rejeitado";
     chamado.aprovacao_data = new Date();
     chamado.motivo_rejeicao = motivo;
     chamado.status = "Cancelado";
+    chamado.aprovador_id = aprovadorId;
 
     await chamado.save();
+
+    // --- 1️⃣ Notificar quem abriu o chamado (assistência / empresa proprietária)
+    const assistencia = await Empresas.findByPk(chamado.empresa_id);
+    if (assistencia && assistencia.telefone) {
+      
+      const msgAssistencia = `Olá! ${assistencia.nome}\nTudo certo?\nSeu chamado de Içamento ${chamado.id} foi *REJEITADO* por ${nomeAdmin} com o seguinte motivo: \n ${motivo}. \n\n Portal Exclusivo para as Assistências Customer Services Samsung.\n\nQualquer dúvida, é só nos chamar por aqui.\nObrigado!\nPortal de Içamento SAMSUNG`;
+
+      try {
+        await enviarNotificacaoWhatsapp(assistencia.telefone, msgAssistencia);
+      } catch (e) {
+        console.error("Falha ao notificar assistência:", e);
+      }
+    }
 
     return res.json({ success: true, message: "Chamado rejeitado com sucesso!" });
   } catch (err) {
