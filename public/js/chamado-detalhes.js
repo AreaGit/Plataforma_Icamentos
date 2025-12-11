@@ -26,8 +26,12 @@ const isAdmin = authTipo === "admin" && !!authAdminId;
 const isEmpresa = authTipo === "empresa" && !!authEmpresaId;
 const isAutorizado = authTipo === "autorizado" && !!authUsuarioAutorizadoId && !!authEmpresaId;
 
+// Variável para armazenar se o adm pode aprovar chamado
+let aprovar_chamados;
+
 // Usuário atual genérico
 let currentUserId = null;
+let id_usuario;
 if (isAdmin) currentUserId = Number(authAdminId);
 else if (isAutorizado) currentUserId = Number(authUsuarioAutorizadoId);
 else if (isEmpresa) currentUserId = Number(authEmpresaId);
@@ -36,6 +40,44 @@ else if (isEmpresa) currentUserId = Number(authEmpresaId);
 if (!authTipo || !currentUserId) {
   window.location.href = "/samsung/";
 }
+
+if (authTipo === "admin" && authAdminId){
+  id_usuario = authAdminId;
+}
+
+if (authTipo === "empresa" && authEmpresaId) {
+  id_usuario = authEmpresaId;
+}
+
+if (authTipo === "autorizado" && authUsuarioAutorizadoId && authEmpresaId) {
+  id_usuario = authUsuarioAutorizadoId;
+}
+
+// ===========================
+// CARREGAR PERFIL
+// ===========================
+async function carregarPerfil() {
+  try {
+    const res = await fetch(`/empresas/${id_usuario}`);
+    const empresa = await res.json();
+
+    if(authTipo == "admin") {
+      const aprovar_chamado = empresa.aprovar_chamados;
+
+      if(aprovar_chamado == true) {
+        aprovar_chamados = aprovar_chamado;
+      } else {
+        aprovar_chamados = aprovar_chamado;
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar perfil:", error);
+    msg.textContent = "Erro ao carregar perfil.";
+    msg.style.color = "red";
+  }
+}
+// Executar
+carregarPerfil();
 
 /* ============================================================
                     ELEMENTOS DOS MODAIS E TOAST
@@ -91,6 +133,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  console.log(chamado)
+
   // -------------------------
   // PREENCHER CAMPOS
   // -------------------------
@@ -116,6 +160,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     boletoEl.textContent = "A emitir";
   }
+  const data_aprovacao = chamado.aprovacao_data;
+
+  const new_date = new Date(data_aprovacao);
+
+  const formatoBrasil = new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'full', // 'full', 'long', 'medium', 'short'
+    timeStyle: 'medium', // 'full', 'long', 'medium', 'short'
+    timeZone: 'America/Sao_Paulo' // Fuso horário do Brasil
+  });
+
+  const aprovacaoEl = document.getElementById("chamado-aprovacao");
+  aprovacaoEl.innerHTML = `
+    <p>Nome: <span>${chamado.nome_aprovador}</span></p>
+    <p>Data: <span>${formatoBrasil.format(new_date)}</span></p>
+  `;
 
   // -------------------------
   // ANEXOS
@@ -177,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     chamado.aprovacao_status === "Pendente" ||
     chamado.status === "Aguardando Aprovação";
 
-  if (isAdmin && aprovadoPendente) {
+  if (isAdmin && aprovar_chamados == true && aprovadoPendente) {
     areaAprovacao.style.display = "block";
   } else {
     areaAprovacao.style.display = "none";

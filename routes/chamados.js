@@ -416,6 +416,46 @@ app.put("/chamado/:id/propor-data", async (req, res) => {
         //     return res.status(403).json({ error: permitido.msg });
         // }
 
+        if(tipo == "empresa") {
+            const nova = new Date(chamado.nova_data_proposta);
+            const iso = nova.toISOString();
+            const [data, hora] = iso.split("T");
+
+            chamado.data_agenda = data;
+            chamado.horario_agenda = hora.slice(0, 5);
+
+            chamado.nova_data_proposta = null;
+            chamado.proponenteId = null;
+            chamado.tipoProponente = null;
+
+            chamado.status = "Agendado";
+
+            await chamado.save(); 
+            
+            const assistencia = await Empresas.findByPk(chamado.empresa_id);
+            const link = `portalicamento.com.br/samsung/chamado-detalhes?id=${chamado.id}`;
+
+            let mensagem = `
+              Olá, ${assistencia.nome}!
+
+Tudo certo? 😊
+
+Gostaríamos de informar que a nova data para o seu chamado de Içamento ${chamado.id} foi ATUALIZADA com sucesso no nosso Portal Exclusivo para as Assistências Customer Services Samsung. 📅🔧
+
+📌 Agora, você pode acompanhar os novos prazos e etapas diretamente pelo portal: ${link}.
+E, claro, também vamos te manter atualizado por aqui pelo WhatsApp.
+
+Se surgir qualquer dúvida ou se precisar de mais alguma informação, é só nos chamar por aqui! 😉
+
+Obrigado!
+Portal de Içamento SAMSUNG
+            `;
+
+            await enviarNotificacaoWhatsapp(assistencia.telefone, mensagem);
+
+            return res.json({ success: true, message: "Proposta aceita. Data atualizada." });
+        } else {
+
         // Grava proposta
         chamado.nova_data_proposta = novaData;
         chamado.proponenteId = userId;
@@ -429,6 +469,7 @@ app.put("/chamado/:id/propor-data", async (req, res) => {
             message: "Proposta enviada com sucesso. Aguardando resposta da outra parte.",
             proposta: chamado.nova_data_proposta
         });
+      }
 
     } catch (err) {
         console.error("Erro propor nova data:", err);
@@ -545,6 +586,7 @@ app.put("/chamado/:id/aprovar", async (req, res) => {
     chamado.aprovacao_data = new Date();
     chamado.status = "Aguardando"; // Empresa de icamento agora deve assumir
     chamado.aprovador_id = admin.id;
+    chamado.nome_aprovador = nomeAdmin;
 
     await chamado.save();
 

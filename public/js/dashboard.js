@@ -32,13 +32,22 @@ if (!authTipo) {
 
 // 2️⃣ Validar cada tipo de usuário separadamente:
 let autenticado = false;
+let id_usuario;
 
-if (authTipo === "admin" && authAdminId) autenticado = true;
-
-if (authTipo === "empresa" && authEmpresaId) autenticado = true;
-
-if (authTipo === "autorizado" && authUsuarioAutorizadoId && authEmpresaId)
+if (authTipo === "admin" && authAdminId){
   autenticado = true;
+  id_usuario = authAdminId;
+}
+
+if (authTipo === "empresa" && authEmpresaId) {
+  autenticado = true;
+  id_usuario = authEmpresaId;
+}
+
+if (authTipo === "autorizado" && authUsuarioAutorizadoId && authEmpresaId) {
+  autenticado = true;
+  id_usuario = authUsuarioAutorizadoId;
+}
 
 // 3️⃣ Se nada disso for válido → não logado
 if (!autenticado) {
@@ -49,11 +58,34 @@ if (!autenticado) {
 // REGRAS ESPECÍFICAS DE UI
 // ===========================
 
-// Admin → NÃO pode criar chamado
-if (authTipo === "admin") {
-  const btnNovo = document.querySelector(".novo-btn");
-  if (btnNovo) btnNovo.style.display = "none";
+// ===========================
+// CARREGAR PERFIL
+// ===========================
+async function carregarPerfil() {
+  try {
+    const res = await fetch(`/empresas/${id_usuario}`);
+    const empresa = await res.json();
+
+    if(authTipo == "admin") {
+      const realizar_chamados = empresa.realizar_chamados;
+
+      if(realizar_chamados == true) {
+        const btnNovo = document.querySelector(".novo-btn");
+        if (btnNovo) btnNovo.style.display = "block";
+      } else {
+        const btnNovo = document.querySelector(".novo-btn");
+        if (btnNovo) btnNovo.style.display = "none";
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao carregar perfil:", error);
+    msg.textContent = "Erro ao carregar perfil.";
+    msg.style.color = "red";
+  }
 }
+// Executar
+carregarPerfil();
+
 // ===========================
 // CARREGAR CHAMADOS
 // ===========================
