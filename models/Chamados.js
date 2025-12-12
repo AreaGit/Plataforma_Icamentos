@@ -103,6 +103,11 @@ const Chamados = db.define('chamados', {
         allowNull: true
     },
 
+    nome_aprovador: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+
     criador_id: {
         type: Sequelize.INTEGER,
         allowNull: false

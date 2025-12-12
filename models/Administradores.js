@@ -33,6 +33,14 @@ const Administradores = db.define('administradores', {
     ativo: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
+    },
+    realizar_chamados: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
+    aprovar_chamados: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
     }
 });
 
