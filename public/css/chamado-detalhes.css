@@ -150,6 +150,10 @@ h1 {
   color: #333;
 }
 
+.detail-item > p > a {
+  font-size: 0.8em;
+}
+
 /* status estilizado */
 .status {
   display: inline-block;

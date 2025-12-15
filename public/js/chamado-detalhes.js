@@ -156,7 +156,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // boleto
   const boletoEl = document.getElementById("chamado-boleto");
   if (chamado.boletoUrl && chamado.boletoUrl !== "a emitir") {
-    boletoEl.innerHTML = `<a href="${chamado.boletoUrl}" target="_blank">Acesse Aqui</a>`;
+    boletoEl.innerHTML = `
+    <a href="${chamado.boletoUrl}" target="_blank">Acesse Aqui o Boleto 35DDL</a>
+    <br>
+    <a href="${chamado.nfseUrl}" target="_blank">Acesse Aqui a Nota Fiscal de Serviço</a>
+    `;
   } else {
     boletoEl.textContent = "A emitir";
   }
