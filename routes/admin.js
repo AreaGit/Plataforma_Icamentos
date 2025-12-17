@@ -1,248 +1,203 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const Sequelize = require('sequelize');
+const { Op } = Sequelize;
+
+// MODELS
 const Empresas = require('../models/Empresas');
-const Usuarios_Autorizados = require('../models/Usuarios_Autorizados');
+const Empresas_Icamento = require('../models/Empresas_Icamento');
+const Chamados = require('../models/Chamados');
+const Administradores = require('../models/Administradores');
+
+// EMAIL
+const nodemailer = require('nodemailer');
+
+// WHATSAPP
 const { client, sendMessage } = require('./api/whatsapp-web');
 client.on('ready', () => {
   console.log('Cliente WhatsApp pronto para uso no admin.js');
 });
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-const { Op } = require('sequelize');
-const Empresas_Icamento = require('../models/Empresas_Icamento');
-const Chamados = require('../models/Chamados');
-const Sequelize = require('sequelize');
 
-// Funções
+// ======================================
+// 🔧 FUNÇÕES AUXILIARES
+// ======================================
+
 async function enviarNotificacaoWhatsapp(destinatario, corpo) {
-  try {
-      const response = await sendMessage(destinatario, corpo);
-      console.log(`Mensagem de código de verificação enviada com sucesso para o cliente ${destinatario}:`, response);
-      return response;
-  } catch (error) {
-      console.error(`Erro ao enviar mensagem para o cliente ${destinatario}:`, error);
-      throw error;
-  }
+  return await sendMessage(destinatario, corpo);
 }
 
 async function enviarEmailNotificacao(destinatario, assunto, corpo) {
   const transporter = nodemailer.createTransport({
-    host: 'email-ssl.com.br',  // Servidor SMTP da LocalWeb
-    port: 465,                 // Porta para SSL (465)
-    secure: true,              // Usar conexão segura (SSL)
+    host: process.env.SMTP_HOST,
+    port: 465,
+    secure: true,
     auth: {
-      user: 'atendimento@areapromocional.com.br',  // E-mail que você vai usar para enviar
-      pass: 'Z1mb@bue',                    // Senha do e-mail
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
-  })
+  });
 
-  const info = await transporter.sendMail({
-    from: 'atendimento@areapromocional.com.br',
+  await transporter.sendMail({
+    from: process.env.SMTP_USER,
     to: destinatario,
     subject: assunto,
     html: corpo,
   });
-
-  console.log('E-mail enviado:', info);
 }
 
-// Rotas
+// ======================================
+// 👤 ADMINISTRADORES (CRUD)
+// ======================================
 
-// Buscar empresa por ID
-app.get('/empresa/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const empresa = await Empresas_Icamento.findByPk(id);
-
-    if (!empresa) {
-      return res.status(404).json({ message: 'Empresa não encontrada' });
-    }
-
-    res.json(empresa);
-  } catch (error) {
-    console.error('Erro ao buscar empresa por ID:', error);
-    res.status(500).json({ message: 'Erro ao buscar empresa' });
-  }
+// Listar admins
+app.get('/administradores', async (req, res) => {
+  const admins = await Administradores.findAll({
+    attributes: { exclude: ['senha'] }
+  });
+  res.json(admins);
 });
 
-// Buscar assistencia por ID
-app.get('/assistencia/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+app.get("/administradores/:id", async (req, res) => {
+  const admin = await Administradores.findByPk(req.params.id);
+  if(!admin) { return res.status(404).json({ message: "Admin não encontrado! " }) }
 
-    const empresa = await Empresas.findByPk(id);
-
-    if (!empresa) {
-      return res.status(404).json({ message: 'Empresa não encontrada' });
-    }
-
-    res.json(empresa);
-  } catch (error) {
-    console.error('Erro ao buscar empresa por ID:', error);
-    res.status(500).json({ message: 'Erro ao buscar empresa' });
-  }
+  res.json(admin);
 });
 
-app.post('/empresa/salvar', async (req, res) => {
-  try {
-    const {
-      id,
-      nome,
-      cnpj,
-      email,
-      telefone,
-      endereco,
-      cidade,
-      estado,
-      cep
-    } = req.body;
+// Criar admin
+app.post('/administradores', async (req, res) => {
+  const { nome, email, senha } = req.body;
+  const hash = await bcrypt.hash(senha, 10);
 
-    const dados = {
-      nome,
-      cnpj,
-      email,
-      telefone,
-      endereco,
-      cidade,
-      estado,
-      cep
-    };
+  const admin = await Administradores.create({
+    nome,
+    email,
+    senha: hash
+  });
 
-    let empresa;
-    if (id) {
-      empresa = await Empresas.findByPk(id);
-      if (!empresa) return res.status(404).json({ message: 'Empresa não encontrada' });
-      await empresa.update(dados);
-    } else {
-      empresa = await Empresas.create(dados);
-    }
-
-    res.json({ message: 'Empresa salva com sucesso', empresa });
-
-  } catch (error) {
-    console.error('Erro ao salvar empresa:', error);
-    res.status(500).json({ message: 'Erro ao salvar empresa' });
-  }
+  res.json(admin);
 });
 
-app.post('/assistencia/salvar', async (req, res) => {
-  try {
-    const {
-      id,
-      nome,
-      cnpj,
-      email,
-      telefone,
-      endereco,
-      cidade,
-      estado,
-      cep
-    } = req.body;
+// Atualizar admin
+app.put('/administradores/:id', async (req, res) => {
+  const admin = await Administradores.findByPk(req.params.id);
+  if (!admin) return res.status(404).json({ message: 'Admin não encontrado' });
 
-    const dados = {
-      nome,
-      cnpj,
-      email,
-      telefone,
-      endereco,
-      cidade,
-      estado,
-      cep
-    };
-
-    let empresa;
-    if (id) {
-      empresa = await Empresas_Icamento.findByPk(id);
-      if (!empresa) return res.status(404).json({ message: 'Empresa não encontrada' });
-      await empresa.update(dados);
-    } else {
-      empresa = await Empresas_Icamento.create(dados);
-    }
-
-    res.json({ message: 'Empresa salva com sucesso', empresa });
-
-  } catch (error) {
-    console.error('Erro ao salvar empresa:', error);
-    res.status(500).json({ message: 'Erro ao salvar empresa' });
-  }
+  await admin.update(req.body);
+  res.json(admin);
 });
 
-app.get('/all-empresas', async (req, res) => {
-  try {
-    const empresas = await Empresas.findAll({
-      attributes: {
-        exclude: ['senha', 'reset_token', 'reset_token_expiration', 'createdAt', 'updatedAt']
-      }
-    });
-    res.json(empresas);
-  } catch (error) {
-    console.error('Erro ao listar empresas:', error);
-    res.status(500).json({ message: 'Erro ao listar empresas' });
-  }
+// Excluir admin
+app.delete('/administradores/:id', async (req, res) => {
+  await Administradores.destroy({ where: { id: req.params.id } });
+  res.json({ message: 'Administrador excluído' });
 });
 
-app.get('/all-assistencias', async (req, res) => {
-  try {
-    const assistencias = await Empresas_Icamento.findAll({
-      attributes: {
-        exclude: ['senha', 'createdAt', 'updatedAt']
-      }
-    });
-    res.json(assistencias);
-  } catch (error) {
-    console.error('Erro ao listar assistencias:', error);
-    res.status(500).json({ message: 'Erro ao listar assistencias' });
-  }
+// ======================================
+// 🏢 EMPRESAS
+// ======================================
+
+app.get('/empresas', async (_, res) => {
+  const empresas = await Empresas.findAll({
+    attributes: { exclude: ['senha'] }
+  });
+  res.json(empresas);
 });
 
-app.get('/all-chamados', async (req, res) => {
-  try {
-    const { status, dataInicio, dataFim } = req.query;
+app.get('/empresas/:id', async (req, res) => {
+  const empresa = await Empresas.findByPk(req.params.id);
+  if (!empresa) return res.status(404).json({ message: 'Empresa não encontrada' });
+  res.json(empresa);
+});
 
-    const where = {};
-    if (status) where.status = status;
-    if (dataInicio && dataFim) {
-      where.data_agenda = {
-        [Sequelize.Op.between]: [dataInicio, dataFim]
-      };
-    } else if (dataInicio) {
-      where.data_agenda = { [Sequelize.Op.gte]: dataInicio };
-    } else if (dataFim) {
-      where.data_agenda = { [Sequelize.Op.lte]: dataFim };
-    }
+app.post('/empresas', async (req, res) => {
+  const empresa = await Empresas.create(req.body);
+  res.json(empresa);
+});
 
-    const chamados = await Chamados.findAll({
-      where,
-      attributes: { exclude: ['createdAt', 'updatedAt'] }
-    });
+app.put('/empresas/:id', async (req, res) => {
+  const empresa = await Empresas.findByPk(req.params.id);
+  await empresa.update(req.body);
+  res.json(empresa);
+});
 
-    res.json(chamados);
-  } catch (error) {
-    console.error('Erro ao listar chamados com filtros:', error);
-    res.status(500).json({ message: 'Erro ao listar chamados' });
+app.delete('/empresas/:id', async (req, res) => {
+  await Empresas.destroy({ where: { id: req.params.id } });
+  res.json({ message: 'Empresa excluída' });
+});
+
+// ======================================
+// 🏗️ EMPRESAS DE IÇAMENTO
+// ======================================
+
+app.get('/assistencias', async (_, res) => {
+  const assistencias = await Empresas_Icamento.findAll();
+  res.json(assistencias);
+});
+
+app.get("/assistencias/:id", async (req, res) => {
+  const assistencia = await Empresas_Icamento.findByPk(req.params.id);
+  if(!assistencia) { return res.status(404).json({ message: "Assistencia não encontrada! " }) }
+
+  res.json(assistencia);
+});
+
+app.post('/assistencias', async (req, res) => {
+  const assistencia = await Empresas_Icamento.create(req.body);
+  res.json(assistencia);
+});
+
+app.put('/assistencias/:id', async (req, res) => {
+  const assistencia = await Empresas_Icamento.findByPk(req.params.id);
+  await assistencia.update(req.body);
+  res.json(assistencia);
+});
+
+app.delete('/assistencias/:id', async (req, res) => {
+  await Empresas_Icamento.destroy({ where: { id: req.params.id } });
+  res.json({ message: 'Assistência excluída' });
+});
+
+// ======================================
+// 📞 CHAMADOS (CRUD + FILTROS)
+// ======================================
+
+app.get('/chamados', async (req, res) => {
+  const { status, dataInicio, dataFim } = req.query;
+
+  const where = {};
+  if (status) where.status = status;
+  if (dataInicio && dataFim) {
+    where.data_agenda = { [Op.between]: [dataInicio, dataFim] };
   }
+
+  const chamados = await Chamados.findAll({ where });
+  res.json(chamados);
+});
+
+app.get('/chamados/:id', async (req, res) => {
+  const chamado = await Chamados.findByPk(req.params.id);
+  res.json(chamado);
+});
+
+app.put('/chamados/:id', async (req, res) => {
+  const chamado = await Chamados.findByPk(req.params.id);
+  await chamado.update(req.body);
+  res.json(chamado);
 });
 
 app.put('/chamados/:id/status', async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+  const chamado = await Chamados.findByPk(req.params.id);
+  chamado.status = req.body.status;
+  await chamado.save();
+  res.json({ message: 'Status atualizado' });
+});
 
-  try {
-    const chamado = await Chamados.findByPk(id);
-    if (!chamado) {
-      return res.status(404).json({ message: 'Chamado não encontrado' });
-    }
-
-    chamado.status = status;
-    await chamado.save();
-
-    res.json({ message: 'Status atualizado com sucesso' });
-  } catch (error) {
-    console.error('Erro ao atualizar status do chamado:', error);
-    res.status(500).json({ message: 'Erro ao atualizar status' });
-  }
+app.delete('/chamados/:id', async (req, res) => {
+  await Chamados.destroy({ where: { id: req.params.id } });
+  res.json({ message: 'Chamado excluído' });
 });
 
 module.exports = app;
