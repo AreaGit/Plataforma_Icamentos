@@ -100,12 +100,12 @@ async function carregarChamados() {
 
     // EMPRESA PROPRIETÁRIA → vê apenas seus chamados
     else if (authTipo === "empresa") {
-      url = `/chamados/${authEmpresaId}`;
+      url = `/chamados_empresa/${authEmpresaId}`;
     }
 
     // USUÁRIO AUTORIZADO → vê chamados da empresa dele
     else if (authTipo === "autorizado") {
-      url = `/chamados/${authEmpresaId}`;
+      url = `/chamados_empresa/${authEmpresaId}`;
     }
 
     else {

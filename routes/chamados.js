@@ -286,18 +286,61 @@ app.post('/criar-chamado', upload.array('anexos'), async (req, res) => {
     // ======================================
     // 📲 NOTIFICAÇÃO WHATSAPP AO APROVADOR
     // ======================================
+    const aprovadores = await Administradores.findAll({
+      where: {
+        aprovar_chamados: true,
+        ativo: true
+      },
+      attributes: ['id', 'nome', 'telefone']
+    });
+
     const link = `portalicamento.com.br/samsung/chamado-detalhes?id=${novoChamado.id}`;
 
-    await enviarNotificacaoWhatsapp(
-      empresaProprietaria.telefone,
-      `Olá, ${empresaProprietaria.nome}
-Há um novo chamado de içamento aguardando sua aprovação:
+    if (!aprovadores || aprovadores.length === 0) {
+      console.warn("⚠️ Nenhum aprovador encontrado para notificação.");
+    } else {
+      for (const aprovador of aprovadores) {
+        if (!aprovador.telefone) continue;
 
-📌 Chamado: ${novoChamado.id}
-➡ Acesse: ${link}
+        await enviarNotificacaoWhatsapp(
+          aprovador.telefone,
+          `Olá, ${aprovador.nome}
+    Há um novo chamado de içamento aguardando sua aprovação:
 
-Portal de Içamento Samsung`
-    );
+    📌 Chamado: ${novoChamado.id}
+    🏢 Empresa: ${empresaProprietaria.nome}
+    ➡ Acesse: ${link}
+
+    Portal de Içamento Samsung`
+        );
+      }
+    }
+
+    // ======================================
+    // 🏢 NOTIFICAÇÃO À EMPRESA PROPRIETÁRIA
+    // ======================================
+    try {
+      if (empresaProprietaria?.telefone) {
+        await enviarNotificacaoWhatsapp(
+          empresaProprietaria.telefone,
+          `Olá, ${empresaProprietaria.nome}
+
+    Recebemos seu chamado de içamento com sucesso ✅
+
+    📌 Chamado: ${novoChamado.id}
+    🕒 Status atual: Em processo de aprovação
+
+    Nossa equipe está analisando as informações e, assim que a aprovação for concluída, você será notificado(a).
+
+    Acompanhe o andamento pelo portal:
+    ➡ ${link}
+
+    Portal de Içamento Samsung`
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao notificar empresa proprietária:", error);
+    }
 
     // ======================================
     // 🔔 NOTIFICAR EMPRESA DE IÇAMENTO (ID=1)
@@ -322,7 +365,7 @@ Portal de Içamento Samsung`
 });
 
 // Listar chamados por empresa
-app.get('/chamados/:id', async (req, res) => {
+app.get('/chamados_empresa/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const chamados = await Chamados.findAll({ where: { empresa_id: id } });
@@ -568,10 +611,19 @@ app.put("/chamado/:id/aprovar", async (req, res) => {
     const chamado = await Chamados.findByPk(id);
     if (!chamado) return res.status(404).json({ error: "Chamado não encontrado" });
 
-    // VERIFICA SE É ADMINISTRADOR
-    const admin = await Administradores.findByPk(adminId);
+    // VERIFICA SE É ADMINISTRADOR COM PERMISSÃO
+    const admin = await Administradores.findOne({
+      where: {
+        id: adminId,
+        ativo: true,
+        aprovar_chamados: true
+      }
+    });
+
     if (!admin) {
-      return res.status(403).json({ error: "Somente administradores podem aprovar chamados." });
+      return res.status(403).json({
+        error: "Administrador não possui permissão para aprovar chamados."
+      });
     }
 
     //VARIÁVEIS PARA AS INFORMAÇÕES DO ADMIN

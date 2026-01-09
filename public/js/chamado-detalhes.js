@@ -127,13 +127,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`/chamado/${chamadoId}`);
     if (!res.ok) throw new Error("Erro ao carregar chamado");
     chamado = await res.json();
+    console.log(chamado)
   } catch (e) {
     console.error(e);
     alert("Erro ao carregar chamado");
     return;
   }
-
-  console.log(chamado)
 
   // -------------------------
   // PREENCHER CAMPOS
@@ -165,6 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     boletoEl.textContent = "A emitir";
   }
   const data_aprovacao = chamado.aprovacao_data;
+  const aprovacaoEl = document.getElementById("chamado-aprovacao");
 
   const new_date = new Date(data_aprovacao);
 
@@ -174,11 +174,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     timeZone: 'America/Sao_Paulo' // Fuso horário do Brasil
   });
 
-  const aprovacaoEl = document.getElementById("chamado-aprovacao");
-  aprovacaoEl.innerHTML = `
-    <p>Nome: <span>${chamado.nome_aprovador}</span></p>
-    <p>Data: <span>${formatoBrasil.format(new_date)}</span></p>
-  `;
+  if(chamado.aprovacao_data == null) {
+      aprovacaoEl.innerHTML = `
+      <p>Nome: <span>Aguardando Aprovador</span></p>
+      <p>Data: <span>Aguardando Aprovador</span></p>
+    `;
+  } else {
+    aprovacaoEl.innerHTML = `
+      <p>Nome: <span>${chamado.nome_aprovador}</span></p>
+      <p>Data: <span>${formatoBrasil.format(new_date)}</span></p>
+    `;
+  }
 
   // -------------------------
   // ANEXOS
@@ -236,9 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const areaAprovacao = document.getElementById("areaAprovacao");
 
   // Admin pode aprovar/rejeitar o chamado, se estiver pendente
-  const aprovadoPendente =
-    chamado.aprovacao_status === "Pendente" ||
-    chamado.status === "Aguardando Aprovação";
+  const aprovadoPendente = chamado.aprovacao_status === "Pendente";
 
   if (isAdmin && aprovar_chamados == true && aprovadoPendente) {
     areaAprovacao.style.display = "block";

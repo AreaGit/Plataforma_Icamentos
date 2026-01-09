@@ -101,7 +101,7 @@ if (!autenticado) {
 
 async function carregarInfoUsers(id) {
   try {
-    const response = await fetch(`/assistencia/${id}`);
+    const response = await fetch(`/empresas/${id}`);
     if (!response.ok) throw new Error("Erro ao consultar assistência");
 
     const result = await response.json();
